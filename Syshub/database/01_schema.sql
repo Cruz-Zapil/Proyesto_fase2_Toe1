@@ -30,7 +30,7 @@ CREATE TABLE usuarios (
     email_verificado_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT valid_email CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
+    CONSTRAINT valid_email CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 );
 
 CREATE TABLE sesiones (
@@ -72,7 +72,7 @@ CREATE TABLE etiquetas (
 CREATE TABLE proyectos (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     autor_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-    curso_id UUID NOT NULL REFERENCES cursos(id) ON DELETE SET NULL,
+    curso_id UUID REFERENCES cursos(id) ON DELETE SET NULL,  
     titulo VARCHAR(255) NOT NULL,
     descripcion TEXT NOT NULL,
     stack_tecnologico VARCHAR(255),
@@ -167,7 +167,7 @@ CREATE TABLE articulos (
 
 CREATE TABLE reportes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    usuario_reporte_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE SET NULL,
+    usuario_reporte_id UUID REFERENCES usuarios(id) ON DELETE SET NULL,
     contenido_id UUID NOT NULL,
     tipo_contenido VARCHAR(50) NOT NULL CHECK (tipo_contenido IN ('proyecto', 'hilo', 'comentario', 'articulo')),
     motivo VARCHAR(500) NOT NULL,
