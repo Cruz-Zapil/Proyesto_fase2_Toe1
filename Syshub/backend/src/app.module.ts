@@ -11,6 +11,9 @@ import { ProjectsModule } from './modules/projects/projects.module';
 import { ForumsModule } from './modules/forums/forums.module';
 import { AdminModule } from './modules/admin/admin.module';
 
+// carrera
+import { CarrerasModule } from './modules/carreras/carreras.module';
+
 // Config
 import { typeOrmConfig } from './config/typeorm.config';
 
@@ -21,11 +24,12 @@ import { typeOrmConfig } from './config/typeorm.config';
       envFilePath: '.env',
     }),
     TypeOrmModule.forRoot(typeOrmConfig),
-    AuthModule,
+  AuthModule,
     UsersModule,
     ProjectsModule,
     ForumsModule,
     AdminModule,
+    CarrerasModule
   ],
   controllers: [AppController],
   providers: [AppService],

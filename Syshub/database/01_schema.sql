@@ -4,8 +4,13 @@
 -- PostgreSQL 12+
 -- ============================================================================
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- ============================================================================
+-- SYSHUB DATABASE SCHEMA (FIXED)
+-- PostgreSQL 18+
+-- ============================================================================
+
+-- Extensiones (usar solo pgcrypto)
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- ============================================================================
@@ -13,49 +18,102 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 -- ============================================================================
 
 CREATE TABLE roles (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre VARCHAR(50) UNIQUE NOT NULL,
     descripcion TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
+
 CREATE TABLE usuarios (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     rol_id UUID NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,
-    estado VARCHAR(50) DEFAULT 'activo' CHECK (estado IN ('activo', 'suspendido', 'eliminado')),
+    estado VARCHAR(50) DEFAULT 'activo'
+        CHECK (estado IN ('activo', 'suspendido', 'eliminado')),
     token_verificacion VARCHAR(255),
     email_verificado_at TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT valid_email CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
+
+-- ============================================================================
+-- CARRERAS
+-- ============================================================================
+
+CREATE TABLE carreras (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nombre VARCHAR(150) UNIQUE NOT NULL,
+    codigo VARCHAR(50) UNIQUE,
+    facultad VARCHAR(150),
+    activo BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE usuario_carrera (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    carrera_id UUID NOT NULL REFERENCES carreras(id) ON DELETE CASCADE,
+    estado VARCHAR(50) DEFAULT 'activo'
+        CHECK (estado IN ('activo', 'pausado', 'finalizado', 'abandonado')),
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE,
+    es_principal BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+
+-- índice correcto (fuera del CREATE TABLE)
+CREATE UNIQUE INDEX unica_carrera_activa
+ON usuario_carrera(usuario_id, carrera_id)
+WHERE estado = 'activo';
+
+CREATE UNIQUE INDEX unica_principal
+ON usuario_carrera(usuario_id)
+WHERE es_principal = true;
+
+
+
+-- ============================================================================
+-- DOMINIOS EMAIL
+-- ============================================================================
+
+CREATE TABLE dominios_permitidos (
+    dominio VARCHAR(100) PRIMARY KEY
+);
+
+
+-- ============================================================================
+-- SESIONES
+-- ============================================================================
+
 CREATE TABLE sesiones (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     jwt_token TEXT NOT NULL,
     expira_at TIMESTAMP NOT NULL,
     ip_address VARCHAR(45),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT sesion_no_duplicada UNIQUE(usuario_id, jwt_token)
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(usuario_id, jwt_token)
 );
 
 -- ============================================================================
--- MÓDULO 5: TAXONOMÍA (Cursos y Áreas Técnicas)
+-- MÓDULO 5: TAXONOMÍA (Cursos y carreras)
 -- ============================================================================
 
 CREATE TABLE cursos (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre VARCHAR(255) NOT NULL,
     codigo VARCHAR(50) UNIQUE NOT NULL,
+    carrera_id UUID REFERENCES carreras(id) ON DELETE SET NULL,
     area_tecnica VARCHAR(100) NOT NULL,
     semestre INTEGER NOT NULL CHECK (semestre > 0),
     activo BOOLEAN DEFAULT true,
     descripcion TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- ============================================================================
@@ -63,37 +121,38 @@ CREATE TABLE cursos (
 -- ============================================================================
 
 CREATE TABLE etiquetas (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre VARCHAR(100) UNIQUE NOT NULL,
     uso_count INTEGER DEFAULT 1,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE proyectos (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     autor_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-    curso_id UUID REFERENCES cursos(id) ON DELETE SET NULL,  
+    curso_id UUID REFERENCES cursos(id) ON DELETE SET NULL,
     titulo VARCHAR(255) NOT NULL,
     descripcion TEXT NOT NULL,
     stack_tecnologico VARCHAR(255),
     area_tecnica VARCHAR(100),
-    estado VARCHAR(50) DEFAULT 'borrador' CHECK (estado IN ('borrador', 'publicado', 'archivado')),
+    estado VARCHAR(50) DEFAULT 'borrador'
+        CHECK (estado IN ('borrador', 'publicado', 'archivado')),
     destacado BOOLEAN DEFAULT false,
     destacado_por UUID REFERENCES usuarios(id) ON DELETE SET NULL,
     vistas INTEGER DEFAULT 0,
     rating DECIMAL(3,2) DEFAULT 0.0,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE archivos_proyecto (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     proyecto_id UUID NOT NULL REFERENCES proyectos(id) ON DELETE CASCADE,
     nombre_original VARCHAR(255) NOT NULL,
     url_storage VARCHAR(500) NOT NULL,
     tipo_mime VARCHAR(100),
-    tamano_bytes BIGINT,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    tamano_bytes BIGINT CHECK (tamano_bytes >= 0),
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE proyecto_etiqueta (
@@ -107,7 +166,7 @@ CREATE TABLE proyecto_etiqueta (
 -- ============================================================================
 
 CREATE TABLE hilos (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     autor_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     curso_id UUID REFERENCES cursos(id) ON DELETE SET NULL,
     titulo VARCHAR(255) NOT NULL,
@@ -122,7 +181,7 @@ CREATE TABLE hilos (
 );
 
 CREATE TABLE comentarios (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     hilo_id UUID NOT NULL REFERENCES hilos(id) ON DELETE CASCADE,
     usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     contenido TEXT NOT NULL,
@@ -136,7 +195,7 @@ CREATE TABLE comentarios (
 );
 
 CREATE TABLE votos (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     contenido_id UUID NOT NULL,
     tipo_contenido VARCHAR(50) NOT NULL CHECK (tipo_contenido IN ('hilo', 'comentario')),
@@ -146,7 +205,7 @@ CREATE TABLE votos (
 );
 
 CREATE TABLE articulos (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     autor_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     titulo VARCHAR(255) NOT NULL,
     slug VARCHAR(300) UNIQUE NOT NULL,
@@ -166,7 +225,7 @@ CREATE TABLE articulos (
 -- ============================================================================
 
 CREATE TABLE reportes (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     usuario_reporte_id UUID REFERENCES usuarios(id) ON DELETE SET NULL,
     contenido_id UUID NOT NULL,
     tipo_contenido VARCHAR(50) NOT NULL CHECK (tipo_contenido IN ('proyecto', 'hilo', 'comentario', 'articulo')),
@@ -180,7 +239,7 @@ CREATE TABLE reportes (
 );
 
 CREATE TABLE notificaciones (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     tipo VARCHAR(50) NOT NULL CHECK (tipo IN ('mención', 'respuesta', 'voto', 'comentario', 'proyecto_destacado', 'moderación')),
     contenido_id UUID,
@@ -191,7 +250,7 @@ CREATE TABLE notificaciones (
 );
 
 CREATE TABLE auditoria (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     usuario_id UUID REFERENCES usuarios(id) ON DELETE SET NULL,
     accion VARCHAR(100) NOT NULL,
     tabla_afectada VARCHAR(100) NOT NULL,
@@ -259,6 +318,17 @@ INSERT INTO cursos (nombre, codigo, area_tecnica, semestre, descripcion) VALUES
     ('Bases de Datos', 'BD001', 'Infraestructura', 2, 'Diseño y gestión de bases de datos'),
     ('Inteligencia Artificial', 'IA001', 'Inteligencia Artificial', 5, 'Introducción a IA y ML'),
     ('DevOps', 'DEVOPS001', 'Infraestructura', 6, 'Automatización y despliegue');
+
+INSERT INTO dominios_permitidos (dominio) VALUES
+    ('cunoc.edu.gt'),
+    ('usac.edu.gt');
+
+INSERT INTO carreras (nombre, codigo, facultad) VALUES
+    ('Ingeniería en Sistemas', 'IS001', 'Division de Ingeniería'),
+    ('Ingeniería Industrial', 'ISW001', 'Division de Ingeniería'),
+    ('Ingeniería Mecanica', 'IM001', 'Division de Ingeniería'),
+    ('Ingeniería Civil', 'IC001', 'Division de Ingeniería Civil'),
+
 
 -- ============================================================================
 -- TRIGGERS Y FUNCIONES
@@ -348,6 +418,21 @@ WHERE h.estado != 'cerrado'
 GROUP BY h.id, u.nombre, u.id
 ORDER BY h.updated_at DESC;
 
+
+CREATE OR REPLACE FUNCTION validar_email_institucional(email TEXT)
+RETURNS BOOLEAN AS $$
+DECLARE
+    dominio_email TEXT;
+BEGIN
+    dominio_email := split_part(email, '@', 2);
+
+    RETURN EXISTS (
+        SELECT 1
+        FROM dominios_permitidos
+        WHERE dominio = dominio_email
+    );
+END;
+$$ LANGUAGE plpgsql;
 -- ============================================================================
 -- FIN DEL SCHEMA
--- ============================================================================
+-- =========================================================================

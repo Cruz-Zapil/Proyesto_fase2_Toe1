@@ -41,14 +41,20 @@
         </label>
         <select
           id="carrera"
-          v-model="formData.carrera"
+          v-model="formData.carreraId"
           required
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
         >
-          <option value="">Selecciona tu carrera</option>
-          <option value="sis">Ingeniería en Sistemas</option>
-          <option value="tic">Técnico en Informática</option>
-          <option value="otro">Otra</option>
+          <option value="" disabled>
+            {{ loadingCarreras ? 'Cargando carreras...' : 'Selecciona tu carrera' }}
+          </option>
+          <option
+            v-for="carrera in carreras"
+            :key="carrera.id"
+            :value="carrera.id"
+          >
+            {{ carrera.nombre }}
+          </option>
         </select>
       </div>
 
@@ -82,7 +88,7 @@
         />
       </div>
 
-      <!-- Terms and Conditions -->
+      <!-- Terms -->
       <div class="flex items-start">
         <input
           id="terms"
@@ -96,7 +102,7 @@
         </label>
       </div>
 
-      <!-- Submit Button -->
+      <!-- Submit -->
       <button
         type="submit"
         class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors"
@@ -105,7 +111,6 @@
       </button>
     </form>
 
-    <!-- Login Link -->
     <div class="text-center mt-8">
       <p class="text-gray-600">
         ¿Ya tienes cuenta?
@@ -118,25 +123,49 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { registerUser, getCarreras } from '@/api/auth'
+
+const carreras = ref<{ id: string; nombre: string }[]>([])
+const loadingCarreras = ref(false)
 
 const formData = ref({
   fullname: '',
   email: '',
-  carrera: '',
+  carreraId: '',   // ← UUID de la carrera seleccionada
   password: '',
   confirmPassword: '',
-  acceptTerms: false
+  acceptTerms: false,
 })
 
-const handleRegister = () => {
+onMounted(async () => {
+  loadingCarreras.value = true
+  try {
+    carreras.value = await getCarreras()
+  } catch {
+    alert('Error al cargar las carreras')
+  } finally {
+    loadingCarreras.value = false
+  }
+})
+
+const handleRegister = async () => {
   if (formData.value.password !== formData.value.confirmPassword) {
     alert('Las contraseñas no coinciden')
     return
   }
 
-  console.log('Register attempt:', formData.value)
-  // TODO: Implementar registro con el backend
-  alert('Formulario de registro. Próximamente conectaremos con el backend.')
+  try {
+    const payload = {
+      nombre: formData.value.fullname,
+      email: formData.value.email,
+      password: formData.value.password,
+      carreraId: formData.value.carreraId  // ← UUID al backend
+    }
+    await registerUser(payload)
+    alert('¡Registro exitoso! Ahora puedes iniciar sesión.')
+  } catch (err: any) {
+    alert(err?.response?.data?.message || 'Error al registrar usuario')
+  }
 }
 </script>

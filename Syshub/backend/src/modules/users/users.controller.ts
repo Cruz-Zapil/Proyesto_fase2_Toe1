@@ -1,17 +1,21 @@
-import { Controller, Get, Param, Put, Body } from '@nestjs/common';
+import { Controller, Get, Put, Body, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
+  // GET /api/v1/users/:id
+  // Retorna el perfil de un usuario por su UUID
   @Get(':id')
-  getUser(@Param('id') id: string) {
-    return { message: `Get user ${id} - implementar` };
+  findOne(@Param('id') id: string) {
+    return this.usersService.findById(id);
   }
 
+  // PUT /api/v1/users/:id
+  // Actualiza datos del perfil (nombre, estado, etc.)
   @Put(':id')
-  updateUser(@Param('id') id: string, @Body() dto: any) {
-    return { message: `Update user ${id} - implementar` };
+  update(@Param('id') id: string, @Body() body: any) {
+    return this.usersService.update(id, body);
   }
 }

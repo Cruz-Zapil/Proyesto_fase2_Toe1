@@ -3,25 +3,42 @@ import { ForumsService } from './forums.service';
 
 @Controller('forums')
 export class ForumsController {
-  constructor(private forumsService: ForumsService) {}
+  constructor(private readonly forumsService: ForumsService) {}
 
+  // GET /api/v1/forums/threads
+  // Lista todos los hilos abiertos
   @Get('threads')
-  getThreads() {
-    return { message: 'Get all threads - implementar' };
+  findAllHilos() {
+    return this.forumsService.findAllHilos();
   }
 
-  @Post('threads')
-  createThread(@Body() dto: any) {
-    return { message: 'Create thread - implementar' };
-  }
-
+  // GET /api/v1/forums/threads/:id
+  // Detalle de un hilo con sus datos
   @Get('threads/:id')
-  getThread(@Param('id') id: string) {
-    return { message: `Get thread ${id} - implementar` };
+  findOneHilo(@Param('id') id: string) {
+    return this.forumsService.findOneHilo(id);
   }
 
+  // POST /api/v1/forums/threads
+  // Crea un hilo nuevo
+  // Body: { titulo, contenido, autorId, cursoId?, categoria? }
+  @Post('threads')
+  createHilo(@Body() body: any) {
+    return this.forumsService.createHilo(body);
+  }
+
+  // GET /api/v1/forums/threads/:id/comments
+  // Lista comentarios visibles de un hilo
+  @Get('threads/:id/comments')
+  findComentarios(@Param('id') id: string) {
+    return this.forumsService.findComentariosByHilo(id);
+  }
+
+  // POST /api/v1/forums/threads/:id/comments
+  // Agrega un comentario a un hilo
+  // Body: { contenido, usuarioId, padreId? }
   @Post('threads/:id/comments')
-  addComment(@Param('id') id: string, @Body() dto: any) {
-    return { message: 'Add comment - implementar' };
+  createComentario(@Param('id') id: string, @Body() body: any) {
+    return this.forumsService.createComentario(id, body);
   }
 }

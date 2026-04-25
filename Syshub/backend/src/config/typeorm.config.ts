@@ -1,4 +1,5 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { join } from 'path';
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
   type: 'postgres',
@@ -6,10 +7,10 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   port: parseInt(process.env.DB_PORT || '5432'),
   username: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres123',
-  database: process.env.DB_NAME || 'syshub_db',
+  database: process.env.DB_NAME || 'syshub',
   synchronize: process.env.NODE_ENV !== 'production',
   logging: process.env.NODE_ENV !== 'production',
-  entities: ['src/**/*.entity{.ts,.js}'],
-  migrations: ['src/migrations/**/*{.ts,.js}'],
-  subscribers: ['src/subscribers/**/*{.ts,.js}'],
+  entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
+  migrations: [join(__dirname, '..', 'migrations', '**', '*.{ts,js}')],
+  subscribers: [join(__dirname, '..', 'subscribers', '**', '*.{ts,js}')],
 };
