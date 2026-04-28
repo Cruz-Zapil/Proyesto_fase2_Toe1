@@ -17,8 +17,12 @@ export class User {
   @Column({ name: 'rol_id', type: 'uuid' })
   rolId: string;
 
-  @Column({ default: 'activo' })
-  estado: string;
+@Column({ 
+  default: 'pendiente',  // ← cambiado de 'activo' a 'pendiente'
+  // TypeORM no maneja CHECK constraints nativamente,
+  // por eso lo definimos directo en la BD
+})
+estado: string;
 
   @Column({ nullable: true, length: 255 })
   token_verificacion: string;

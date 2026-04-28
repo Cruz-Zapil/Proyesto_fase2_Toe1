@@ -1,44 +1,46 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { ForumsService } from './forums.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('forums')
 export class ForumsController {
   constructor(private readonly forumsService: ForumsService) {}
 
-  // GET /api/v1/forums/threads
-  // Lista todos los hilos abiertos
+  // GET público — cualquiera puede ver los hilos
   @Get('threads')
   findAllHilos() {
     return this.forumsService.findAllHilos();
   }
 
-  // GET /api/v1/forums/threads/:id
-  // Detalle de un hilo con sus datos
+  // GET público — detalle de un hilo
   @Get('threads/:id')
   findOneHilo(@Param('id') id: string) {
     return this.forumsService.findOneHilo(id);
   }
 
-  // POST /api/v1/forums/threads
-  // Crea un hilo nuevo
-  // Body: { titulo, contenido, autorId, cursoId?, categoria? }
+  // POST protegido — autorId viene del token
+  @UseGuards(JwtAuthGuard)
   @Post('threads')
-  createHilo(@Body() body: any) {
-    return this.forumsService.createHilo(body);
+  createHilo(@Body() body: any, @Request() req: any) {
+    return this.forumsService.createHilo({
+      ...body,
+      autorId: req.user.id, // ← viene del token JWT
+    });
   }
 
-  // GET /api/v1/forums/threads/:id/comments
-  // Lista comentarios visibles de un hilo
+  // GET público — comentarios de un hilo
   @Get('threads/:id/comments')
   findComentarios(@Param('id') id: string) {
     return this.forumsService.findComentariosByHilo(id);
   }
 
-  // POST /api/v1/forums/threads/:id/comments
-  // Agrega un comentario a un hilo
-  // Body: { contenido, usuarioId, padreId? }
+  // POST protegido — usuarioId viene del token
+  @UseGuards(JwtAuthGuard)
   @Post('threads/:id/comments')
-  createComentario(@Param('id') id: string, @Body() body: any) {
-    return this.forumsService.createComentario(id, body);
+  createComentario(@Param('id') id: string, @Body() body: any, @Request() req: any) {
+    return this.forumsService.createComentario(id, {
+      ...body,
+      usuarioId: req.user.id, // ← viene del token JWT
+    });
   }
 }

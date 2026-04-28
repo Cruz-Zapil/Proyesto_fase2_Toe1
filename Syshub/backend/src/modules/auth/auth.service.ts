@@ -31,7 +31,7 @@ export class AuthService {
       nombre: data.nombre,
       email: data.email,
       password: password_hash,
-      estado: 'activo',
+      estado: 'pendiente', // Nuevo usuario inicia como pendiente
       rolId: process.env.DEFAULT_ROLE_ID,
     });
 
@@ -47,9 +47,23 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
+
+
+      console.log('JWT SECRET EN LOGIN:', process.env.JWT_SECRET); // ← agrega esto
+
+      console.log('EMAIL RECIBIDO:', email);      // ← agrega esto
+  console.log('PASSWORD RECIBIDO:', password); // ← y esto
+
     // 1. Buscar usuario por email
     const user = await this.usersService.findByEmail(email);
+
+      console.log('USUARIO ENCONTRADO:', user);   // ← y esto
+
     if (!user) throw new UnauthorizedException('Credenciales incorrectas');
+
+      if (user.estado === 'pendiente') 
+    throw new UnauthorizedException('Tu cuenta está pendiente de aprobación por un moderador');
+  
 
     // 2. Verificar que el usuario esté activo
     if (user.estado !== 'activo') throw new UnauthorizedException('Usuario suspendido o eliminado');

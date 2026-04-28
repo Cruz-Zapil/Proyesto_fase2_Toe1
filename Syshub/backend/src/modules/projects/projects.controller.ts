@@ -1,36 +1,43 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
-  // GET /api/v1/projects — lista proyectos publicados
+  // GET público — cualquiera puede ver proyectos publicados
   @Get()
   findAll() {
     return this.projectsService.findAll();
   }
 
-  // GET /api/v1/projects/:id — detalle de un proyecto
+  // GET público — detalle de un proyecto
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.projectsService.findOne(id);
   }
 
-  // POST /api/v1/projects — crear proyecto
-  // Body: { titulo, descripcion, cursoId, stackTecnologico, autorId }
+  // POST protegido — solo usuarios autenticados pueden crear proyectos
+  // El autorId se extrae del token, no del body
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() body: any) {
-    return this.projectsService.create(body);
+  create(@Body() body: any, @Request() req: any) {
+    return this.projectsService.create({
+      ...body,
+      autorId: req.user.id, // ← viene del token JWT
+    });
   }
 
-  // PUT /api/v1/projects/:id — editar proyecto
+  // PUT protegido — solo el autor puede editar
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   update(@Param('id') id: string, @Body() body: any) {
     return this.projectsService.update(id, body);
   }
 
-  // DELETE /api/v1/projects/:id — archivar proyecto
+  // DELETE protegido — solo el autor puede archivar
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.projectsService.remove(id);

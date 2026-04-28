@@ -1,32 +1,37 @@
-import { Controller, Get, Param, Delete, Put, Body } from '@nestjs/common';
+import { Controller, Get, Put, Delete, Param, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('admin')
+@UseGuards(JwtAuthGuard) // todas las rutas de admin requieren JWT
 export class AdminController {
-  constructor(private adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService) {}
 
+  // GET /api/v1/admin/pendientes
+  // Lista estudiantes esperando aprobación
+  @Get('pendientes')
+  findPendientes() {
+    return this.adminService.findPendientes();
+  }
+
+  // GET /api/v1/admin/users
+  // Lista todos los usuarios
   @Get('users')
-  getUsers() {
-    return { message: 'Get all users - implementar' };
+  findAll() {
+    return this.adminService.findAll();
   }
 
-  @Put('users/:id')
-  updateUser(@Param('id') id: string, @Body() dto: any) {
-    return { message: `Update user ${id} - implementar` };
+  // PUT /api/v1/admin/users/:id/aprobar
+  // Moderador aprueba un estudiante
+  @Put('users/:id/aprobar')
+  aprobar(@Param('id') id: string) {
+    return this.adminService.aprobar(id);
   }
 
-  @Delete('users/:id')
-  deleteUser(@Param('id') id: string) {
-    return { message: `Delete user ${id} - implementar` };
-  }
-
-  @Get('reports')
-  getReports() {
-    return { message: 'Get reports - implementar' };
-  }
-
-  @Get('metrics')
-  getMetrics() {
-    return { message: 'Get metrics - implementar' };
+  // PUT /api/v1/admin/users/:id/rechazar
+  // Moderador rechaza un estudiante
+  @Put('users/:id/rechazar')
+  rechazar(@Param('id') id: string) {
+    return this.adminService.rechazar(id);
   }
 }
