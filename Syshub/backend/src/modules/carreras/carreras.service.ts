@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Carrera } from './carrera.entity';
-import { Curso } from './curso.entity';
+import { Curso } from '../curso/curso.entity';
 
 @Injectable()
 export class CarrerasService {
@@ -14,17 +14,48 @@ export class CarrerasService {
   ) {}
 
   // Retorna todas las carreras activas
-  findAll() {
+  async findAllTrue() {
     return this.carrerasRepository.find({ where: { activo: true } });
   }
 
-  // Retorna un carrera por UUID
-  findOne(id: string) {
-    return this.carrerasRepository.findOne({ where: { id } });
+
+  // GET /carreras
+  async findAll() {
+    return this.carrerasRepository.find({
+      relations: ['division'],
+    });
   }
 
-  // Retorna cursos de una carrera específica
-  findCursosByCarrera(carreraId: string) {
-    return this.cursosRepository.find({ where: { carreraId, activo: true } });
+  // GET /carreras/:id
+  async findById(id: string) {
+    const carrera = await this.carrerasRepository.findOne({
+      where: { id },
+      relations: ['division'],
+    });
+
+    if (!carrera) {
+      throw new NotFoundException('Carrera no encontrada');
+    }
+
+    return carrera;
   }
+
+  //  GET /divisiones/:id/carreras
+  async findByDivision(divisionId: string) {
+    return this.carrerasRepository.find({
+      where: {
+        division: { id: divisionId },
+      },
+      relations: ['division'],
+    });
+  }
+
+  async findCursosByCarrera(carreraId: string) {
+  return this.cursosRepository.find({
+    where: {
+      carrera: { id: carreraId },
+    },
+  });
+}
+
 }

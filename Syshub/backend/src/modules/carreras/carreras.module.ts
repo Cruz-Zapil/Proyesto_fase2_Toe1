@@ -4,7 +4,7 @@ import { Carrera } from './carrera.entity';
 import { UsuarioCarrera } from './usuario_carrera.entity';
 import { CarrerasService } from './carreras.service';
 import { CarrerasController } from './carreras.controller';
-import { Curso } from './curso.entity';
+import { Curso } from '../curso/curso.entity';
 
 @Module({
   

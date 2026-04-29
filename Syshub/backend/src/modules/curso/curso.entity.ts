@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Carrera } from '../carreras/carrera.entity';
 
 @Entity('cursos')
 export class Curso {
@@ -13,6 +14,10 @@ export class Curso {
 
   @Column({ name: 'carrera_id', type: 'uuid', nullable: true })
   carreraId: string;
+
+  @ManyToOne(() => Carrera, (carrera) => carrera.cursos)
+  @JoinColumn({ name: 'carrera_id' })
+  carrera: Carrera;
 
   @Column({ name: 'area_tecnica', length: 100 })
   areaTecnica: string;

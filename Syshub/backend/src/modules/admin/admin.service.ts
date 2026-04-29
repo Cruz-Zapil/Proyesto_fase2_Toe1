@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../users/user.entity';
+import { EstadoUsuario, User } from '../users/user.entity';
 
 @Injectable()
 export class AdminService {
@@ -13,19 +13,19 @@ export class AdminService {
   // Lista usuarios pendientes de aprobación
   findPendientes() {
     return this.usersRepository.find({
-      where: { estado: 'pendiente' },
+      where: { estado: EstadoUsuario.PENDIENTE },
       order: { created_at: 'ASC' },
     });
   }
 
   // Moderador aprueba al estudiante
   aprobar(id: string) {
-    return this.usersRepository.update(id, { estado: 'activo' });
+    return this.usersRepository.update(id, { estado: EstadoUsuario.ACTIVO });
   }
 
   // Moderador rechaza y elimina al estudiante
   rechazar(id: string) {
-    return this.usersRepository.update(id, { estado: 'eliminado' });
+    return this.usersRepository.update(id, { estado: EstadoUsuario.ELIMINADO });
   }
 
   // Lista todos los usuarios

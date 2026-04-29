@@ -1,4 +1,27 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
+
+
+export enum EstadoUsuario {
+  ACTIVO = 'activo',
+  PENDIENTE = 'pendiente',
+  SUSPENDIDO = 'suspendido',
+  ELIMINADO = 'eliminado',
+}
+
+
+export enum EstadoCarreraUsuario {
+  ACTIVO = 'activo',
+  SUSPENDIDO = 'suspendido',
+  ABANDONADO = 'abandonado',
+  FINALIZADO = 'finalizado',
+}
+
 
 @Entity('usuarios')
 export class User {
@@ -7,6 +30,18 @@ export class User {
 
   @Column({ length: 255 })
   nombre: string;
+
+  @Column({ name: 'apellidos', length: 255 })
+  apellidos: string;
+
+  @Column({ length: 20 })
+  telefono: string;
+
+  @Column({ nullable: true, length: 20 })
+  telefono_casa: string;
+
+  @Column({ name: 'registro_academico', length: 50, unique: true })
+  registro_academico: string;
 
   @Column({ unique: true, length: 255 })
   email: string;
@@ -17,12 +52,12 @@ export class User {
   @Column({ name: 'rol_id', type: 'uuid' })
   rolId: string;
 
-@Column({ 
-  default: 'pendiente',  // ← cambiado de 'activo' a 'pendiente'
-  // TypeORM no maneja CHECK constraints nativamente,
-  // por eso lo definimos directo en la BD
-})
-estado: string;
+  @Column({
+    type: 'enum',
+    enum: EstadoUsuario,
+    default: EstadoUsuario.PENDIENTE,
+  })
+  estado: EstadoUsuario;
 
   @Column({ nullable: true, length: 255 })
   token_verificacion: string;

@@ -57,7 +57,8 @@ CREATE TABLE usuarios (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     rol_id UUID NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,
-    estado estado_usuario DEFAULT 'activo',
+    estado estado_usuario DEFAULT 'pendiente',
+
     token_verificacion VARCHAR(255),
     email_verificado_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW(),
