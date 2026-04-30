@@ -19,8 +19,6 @@ export class Curso {
   @JoinColumn({ name: 'carrera_id' })
   carrera: Carrera;
 
-  @Column({ name: 'area_tecnica', length: 100 })
-  areaTecnica: string;
 
   @Column({ type: 'int' })
   semestre: number;

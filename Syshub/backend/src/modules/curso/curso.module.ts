@@ -4,9 +4,10 @@ import { CursoController } from './curso.controller';
 import { CursoService } from './curso.service';
 import { Curso } from './curso.entity';
 import { CarrerasModule } from '../carreras/carreras.module';
+import { UsuarioCurso } from './usuario_curso.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Curso]), CarrerasModule],
+  imports: [TypeOrmModule.forFeature([Curso, UsuarioCurso]), CarrerasModule],
   controllers: [CursoController],
   providers: [CursoService],
   exports: [CursoService],

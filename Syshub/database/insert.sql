@@ -106,22 +106,22 @@ INSERT INTO usuarios ( nombre, apellidos, telefono, registro_academico, email, p
 -- ============================================================================
 -- 6. CURSOS (3 por carrera, usamos Ingeniería en Sistemas, Derecho y Admon)
 -- ============================================================================
-INSERT INTO cursos ( nombre, codigo, carrera_id, area_tecnica, semestre, activo, descripcion) VALUES
+INSERT INTO cursos ( nombre, codigo, carrera_id, semestre, activo, descripcion) VALUES
  
   -- Ingeniería en Sistemas
-  ( 'Introducción a la Programación',  'ING-SIS-101', '66260dd8-63e1-4903-a9f3-c35aa7c26332', 'Programación',      1, true, 'Fundamentos de lógica y programación'),
-  ( 'Bases de Datos 1',                'ING-SIS-201', '66260dd8-63e1-4903-a9f3-c35aa7c26332', 'Bases de Datos',    2, true, 'Modelado relacional y SQL'),
-  ( 'Redes de Computadoras',           'ING-SIS-301', '66260dd8-63e1-4903-a9f3-c35aa7c26332', 'Redes',             3, true, 'Protocolos y arquitectura de redes'),
+  ( 'Introducción a la Programación',  'ING-SIS-101', '885beed6-5472-48b2-ae1c-923c7ae59c4b',  1, true, 'Fundamentos de lógica y programación'),
+  ( 'Bases de Datos 1',                'ING-SIS-201', '885beed6-5472-48b2-ae1c-923c7ae59c4b',  2, true, 'Modelado relacional y SQL'),
+  ( 'Redes de Computadoras',           'ING-SIS-301', '885beed6-5472-48b2-ae1c-923c7ae59c4b',  3, true, 'Protocolos y arquitectura de redes'),
   
   -- Derecho
-  ( 'Introducción al Derecho',         'DER-GEN-101', '907f67c6-e5f1-4988-9e0d-0fceb0f33c8b', 'Derecho General',   1, true, 'Fundamentos del derecho'),
-  ( 'Derecho Constitucional',          'DER-GEN-201', '907f67c6-e5f1-4988-9e0d-0fceb0f33c8b', 'Derecho Público',   2, true, 'Estudio de la constitución política'),
-  ( 'Derecho Civil',                   'DER-GEN-301', '907f67c6-e5f1-4988-9e0d-0fceb0f33c8b', 'Derecho Privado',   3, true, 'Personas, bienes y contratos'),
+  ( 'Introducción al Derecho',         'DER-GEN-101', '892af739-0fd9-497c-8402-eb2e910e7b1c',  1, true, 'Fundamentos del derecho'),
+  ( 'Derecho Constitucional',          'DER-GEN-201', '892af739-0fd9-497c-8402-eb2e910e7b1c',  2, true, 'Estudio de la constitución política'),
+  ( 'Derecho Civil',                   'DER-GEN-301', '892af739-0fd9-497c-8402-eb2e910e7b1c',  3, true, 'Personas, bienes y contratos'),
  
   -- Administración de Empresas
-  ( 'Fundamentos de Administración',   'ECON-ADM-101','d0adbb54-c3e6-4994-b16b-28755320461f', 'Administración',    1, true, 'Principios de administración moderna'),
-  ( 'Contabilidad General',            'ECON-ADM-201','d0adbb54-c3e6-4994-b16b-28755320461f', 'Contabilidad',      2, true, 'Registros contables y estados financieros'),
-  ( 'Mercadotecnia I',                 'ECON-ADM-301','d0adbb54-c3e6-4994-b16b-28755320461f', 'Marketing',         3, true, 'Fundamentos de mercadeo y consumidor');
+  ( 'Fundamentos de Administración',   'ECON-ADM-101','dc8da320-8c72-4f66-8dca-5e15dfed15a4',    1, true, 'Principios de administración moderna'),
+  ( 'Contabilidad General',            'ECON-ADM-201','dc8da320-8c72-4f66-8dca-5e15dfed15a4',    2, true, 'Registros contables y estados financieros'),
+  ( 'Mercadotecnia I',                 'ECON-ADM-301','dc8da320-8c72-4f66-8dca-5e15dfed15a4',    3, true, 'Fundamentos de mercadeo y consumidor');
  
  
 -- ============================================================================

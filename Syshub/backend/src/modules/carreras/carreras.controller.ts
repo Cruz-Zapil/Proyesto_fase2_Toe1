@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe} from '@nestjs/common';
 import { CarrerasService } from './carreras.service';
 
 
@@ -19,10 +19,15 @@ export class CarrerasController {
     return this.carrerasService.findById(id);
   }
 
-  // 🔥 GET /api/v1/divisiones/:id/carreras
+  //  GET /api/v1/divisiones/:id/carreras
   @Get('divisiones/:id/carreras')
   findByDivision(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.carrerasService.findByDivision(id);
   }
 
+
+
+
+
+  
 }

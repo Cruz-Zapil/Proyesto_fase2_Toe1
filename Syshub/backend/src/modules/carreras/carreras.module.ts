@@ -5,11 +5,12 @@ import { UsuarioCarrera } from './usuario_carrera.entity';
 import { CarrerasService } from './carreras.service';
 import { CarrerasController } from './carreras.controller';
 import { Curso } from '../curso/curso.entity';
+import { UsuarioCurso } from '../curso/usuario_curso.entity';
 
 @Module({
   
     imports: [
-    TypeOrmModule.forFeature([Carrera, UsuarioCarrera, Curso])
+    TypeOrmModule.forFeature([Carrera, UsuarioCarrera, Curso, UsuarioCurso]),
     // forFeature registra las entidades para que el repositorio
     // de TypeORM esté disponible dentro de este módulo
   ],

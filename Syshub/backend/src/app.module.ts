@@ -34,6 +34,7 @@ import { CursoModule } from "./modules/curso/curso.module";
     DivisionesModule,
     CarrerasModule,
     CursoModule,
+  
   ],
   controllers: [AppController],
   providers: [AppService],

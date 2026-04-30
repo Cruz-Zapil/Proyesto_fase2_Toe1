@@ -50,12 +50,6 @@ export class CarrerasService {
     });
   }
 
-  async findCursosByCarrera(carreraId: string) {
-  return this.cursosRepository.find({
-    where: {
-      carrera: { id: carreraId },
-    },
-  });
-}
+
 
 }
