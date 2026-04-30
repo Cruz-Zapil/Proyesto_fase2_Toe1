@@ -4,34 +4,55 @@
     <p class="text-gray-600 mb-8">Únete a la comunidad de Syshub</p>
 
     <form @submit.prevent="handleRegister" class="space-y-6">
-      <!-- Full Name -->
+
+
+      <!-- Nombre -->
       <div>
-        <label for="fullname" class="block text-sm font-medium text-gray-700 mb-2">
-          Nombre Completo
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Nombre
         </label>
-        <input
-          id="fullname"
-          v-model="formData.fullname"
-          type="text"
-          required
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-          placeholder="Juan Pérez"
-        />
+        <input v-model="formData.nombre" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          placeholder="Juan" />
       </div>
+
+      <!-- Apellidos -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Apellidos
+        </label>
+        <input v-model="formData.apellidos" type="text" required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Pérez López" />
+      </div>
+
+      <!-- Registro Académico -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Registro Académico
+        </label>
+        <input v-model="formData.registro_academico" type="text" required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="202012345" />
+      </div>
+
+
+      <!-- Teléfono -->
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Teléfono
+        </label>
+        <input v-model="formData.telefono" type="text" required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="50253961074" />
+      </div>
+
 
       <!-- Email -->
       <div>
         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
           Correo Electrónico
         </label>
-        <input
-          id="email"
-          v-model="formData.email"
-          type="email"
-          required
+        <input id="email" v-model="formData.email" type="email" required
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-          placeholder="tu@email.com"
-        />
+          placeholder="tu@email.com" />
       </div>
 
       <!-- Carrera -->
@@ -39,20 +60,12 @@
         <label for="carrera" class="block text-sm font-medium text-gray-700 mb-2">
           Carrera
         </label>
-        <select
-          id="carrera"
-          v-model="formData.carreraId"
-          required
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-        >
+        <select id="carrera" v-model="formData.carreraId" required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
           <option value="" disabled>
             {{ loadingCarreras ? 'Cargando carreras...' : 'Selecciona tu carrera' }}
           </option>
-          <option
-            v-for="carrera in carreras"
-            :key="carrera.id"
-            :value="carrera.id"
-          >
+          <option v-for="carrera in carreras" :key="carrera.id" :value="carrera.id">
             {{ carrera.nombre }}
           </option>
         </select>
@@ -63,14 +76,9 @@
         <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
           Contraseña
         </label>
-        <input
-          id="password"
-          v-model="formData.password"
-          type="password"
-          required
+        <input id="password" v-model="formData.password" type="password" required
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-          placeholder="••••••••"
-        />
+          placeholder="••••••••" />
       </div>
 
       <!-- Confirm Password -->
@@ -78,35 +86,23 @@
         <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
           Confirmar Contraseña
         </label>
-        <input
-          id="confirmPassword"
-          v-model="formData.confirmPassword"
-          type="password"
-          required
+        <input id="confirmPassword" v-model="formData.confirmPassword" type="password" required
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-          placeholder="••••••••"
-        />
+          placeholder="••••••••" />
       </div>
 
       <!-- Terms -->
       <div class="flex items-start">
-        <input
-          id="terms"
-          v-model="formData.acceptTerms"
-          type="checkbox"
-          required
-          class="h-4 w-4 text-blue-600 rounded mt-1"
-        />
+        <input id="terms" v-model="formData.acceptTerms" type="checkbox" required
+          class="h-4 w-4 text-blue-600 rounded mt-1" />
         <label for="terms" class="ml-3 text-sm text-gray-600">
           Acepto los términos y condiciones de Syshub
         </label>
       </div>
 
       <!-- Submit -->
-      <button
-        type="submit"
-        class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors"
-      >
+      <button type="submit"
+        class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors">
         Crear Cuenta
       </button>
     </form>
@@ -130,9 +126,12 @@ const carreras = ref<{ id: string; nombre: string }[]>([])
 const loadingCarreras = ref(false)
 
 const formData = ref({
-  fullname: '',
+  nombre: '',
+  apellidos: '',
+  telefono: '',
+  registro_academico: '',
   email: '',
-  carreraId: '',   // ← UUID de la carrera seleccionada
+  carreraId: '',
   password: '',
   confirmPassword: '',
   acceptTerms: false,
@@ -156,12 +155,19 @@ const handleRegister = async () => {
   }
 
   try {
+
+
     const payload = {
-      nombre: formData.value.fullname,
+      nombre: formData.value.nombre,
+      apellidos: formData.value.apellidos,
+      telefono: formData.value.telefono,
+      registro_academico: formData.value.registro_academico,
       email: formData.value.email,
       password: formData.value.password,
-      carreraId: formData.value.carreraId  // ← UUID al backend
+      carreraId: formData.value.carreraId,
     }
+
+
     await registerUser(payload)
     alert('¡Registro exitoso! Ahora puedes iniciar sesión.')
   } catch (err: any) {

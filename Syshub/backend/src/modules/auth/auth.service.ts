@@ -77,17 +77,20 @@ export class AuthService {
 
 
   async login(email: string, password: string) {
-    console.log("JWT SECRET EN LOGIN:", process.env.JWT_SECRET); // ← agrega esto
-
-    console.log("EMAIL RECIBIDO:", email); // ← agrega esto
-    console.log("PASSWORD RECIBIDO:", password); // ← y esto
 
     // 1. Buscar usuario por email
     const user = await this.usersService.findByEmail(email);
 
-    console.log("USUARIO ENCONTRADO:", user); // ← y esto
-
     if (!user) throw new UnauthorizedException("Credenciales incorrectas");
+
+
+    /// verificar contraseña
+        const passwordValido = await bcrypt.compare(password, user.password);
+
+    if (!passwordValido)
+      throw new UnauthorizedException("Credenciales incorrectas");
+
+    // 3. Verificar estado del usuario
 
     if (user.estado === EstadoUsuario.PENDIENTE)
       throw new UnauthorizedException(
@@ -98,10 +101,8 @@ export class AuthService {
     if (user.estado !== EstadoUsuario.ACTIVO)
       throw new UnauthorizedException("Usuario suspendido o eliminado");
 
-    // 3. Comparar contraseña con el hash guardado
-    const passwordValido = await bcrypt.compare(password, user.password);
-    if (!passwordValido)
-      throw new UnauthorizedException("Credenciales incorrectas");
+ 
+
 
     // 4. Generar JWT con datos del usuario en el payload
     // El payload es la info que viaja dentro del token

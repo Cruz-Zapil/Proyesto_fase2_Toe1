@@ -9,14 +9,9 @@
         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
           Correo Electrónico
         </label>
-        <input
-          id="email"
-          v-model="formData.email"
-          type="email"
-          required
+        <input id="email" v-model="formData.email" type="email" required
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-          placeholder="tu@email.com"
-        />
+          placeholder="tu@email.com" />
       </div>
 
       <!-- Password -->
@@ -24,36 +19,28 @@
         <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
           Contraseña
         </label>
-        <input
-          id="password"
-          v-model="formData.password"
-          type="password"
-          required
+        <input id="password" v-model="formData.password" type="password" required
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-          placeholder="••••••••"
-        />
+          placeholder="••••••••" />
       </div>
 
       <!-- Remember me -->
       <div class="flex items-center">
-        <input
-          id="remember"
-          v-model="formData.rememberMe"
-          type="checkbox"
-          class="h-4 w-4 text-blue-600 rounded"
-        />
+        <input id="remember" v-model="formData.rememberMe" type="checkbox" class="h-4 w-4 text-blue-600 rounded" />
         <label for="remember" class="ml-2 text-sm text-gray-600">
           Recuérdame
         </label>
       </div>
 
       <!-- Submit Button -->
-      <button
-        type="submit"
-        class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors"
-      >
+      <button type="submit"
+        class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors">
         Iniciar Sesión
       </button>
+
+      <p v-if="error" class="text-red-500 text-sm text-center">
+        {{ error }}
+      </p>
     </form>
 
     <!-- Divider -->
@@ -65,8 +52,7 @@
 
     <!-- Social Login (Placeholder) -->
     <button
-      class="w-full bg-gray-100 text-gray-800 font-semibold py-3 rounded-lg hover:bg-gray-200 transition-colors mb-4"
-    >
+      class="w-full bg-gray-100 text-gray-800 font-semibold py-3 rounded-lg hover:bg-gray-200 transition-colors mb-4">
       Continuar con Google
     </button>
 
@@ -84,6 +70,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/authStore'
+
+const router = useRouter()
+const authStore = useAuthStore()
 
 const formData = ref({
   email: '',
@@ -91,9 +82,19 @@ const formData = ref({
   rememberMe: false
 })
 
-const handleLogin = () => {
-  console.log('Login attempt:', formData.value)
-  // TODO: Implementar login con el backend
-  alert('Formulario de login. Próximamente conectaremos con el backend.')
+const error = ref('')
+
+const handleLogin = async () => {
+  try {
+   
+    await authStore.login(
+      formData.value.email,
+      formData.value.password
+    )
+
+    router.push('/')
+  } catch (err: any) {
+    alert('Error al iniciar sesión: ' + (err.response?.data?.message || err.message))
+  }
 }
 </script>
