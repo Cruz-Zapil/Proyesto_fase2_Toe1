@@ -6,12 +6,14 @@ import Login from '@/views/Identidad/Login.vue'
 import Register from '@/views/Identidad/Register.vue'
 import Profile from '@/views/Profile.vue'
 import MyContent from '@/views/MyContent.vue'
+import NewProject from '@/views/NewProject.vue'
 
 const routes = [
   { path: '/', component: Home },
 
   // 🔐 privadas
   { path: '/projects', component: Projects, meta: { requiresAuth: true } },
+  { path: '/projects/new', component: NewProject, meta: { requiresAuth: true } },
   { path: '/forums', component: Forums, meta: { requiresAuth: true } },
   { path: '/profile', component: Profile, meta: { requiresAuth: true } },
   { path: '/my-content', component: MyContent, meta: { requiresAuth: true } },

@@ -66,19 +66,19 @@ INSERT INTO carreras ( nombre, codigo, facultad, activo, division_id) VALUES
 INSERT INTO usuarios ( nombre, apellidos, telefono, registro_academico, email, password_hash, rol_id, estado) VALUES
  
   -- 1 Admin
-  ('Cruz ',    'Zapil',    '50212340001', 'ADMIN-0001', 'admin@usac.edu.gt',            '12345',  '193948ce-5094-48fb-b4b9-3e4a177accae', 'activo'),
+  ('Cruz ',    'Zapil',    '50212340001', 'ADMIN-0001', 'admin@usac.edu.gt',            '12345',  (SELECT id FROM roles WHERE nombre = 'admin'), 'activo'),
  
   -- 4 Docentes
-  ('Carlos',     'Morales López',    '50212340002', 'DOC-2024-01', 'c.morales@usac.edu.gt',        '12345',    'e8d83a1a-a5a3-4c0e-86fc-c5350483707d', 'activo'),
-  ('Lucía',      'Ramírez Pérez',    '50212340003', 'DOC-2024-02', 'l.ramirez@usac.edu.gt',        '12345',    'e8d83a1a-a5a3-4c0e-86fc-c5350483707d', 'activo'),
-  ('Roberto',    'Fuentes García',   '50212340004', 'DOC-2024-03', 'r.fuentes@cunoc.edu.gt',       '12345',    'e8d83a1a-a5a3-4c0e-86fc-c5350483707d', 'activo'),
-  ('Ana María',  'Juárez Cifuentes', '50212340005', 'DOC-2024-04', 'a.juarez@cunoc.edu.gt',        '12345',    'e8d83a1a-a5a3-4c0e-86fc-c5350483707d', 'activo'),
+  ('Carlos',     'Morales López',    '50212340002', 'DOC-2024-01', 'c.morales@usac.edu.gt',        '12345',    (SELECT id FROM roles WHERE nombre = 'docente'), 'activo'),
+  ('Lucía',      'Ramírez Pérez',    '50212340003', 'DOC-2024-02', 'l.ramirez@usac.edu.gt',        '12345',    (SELECT id FROM roles WHERE nombre = 'docente'), 'activo'),
+  ('Roberto',    'Fuentes García',   '50212340004', 'DOC-2024-03', 'r.fuentes@cunoc.edu.gt',       '12345',    (SELECT id FROM roles WHERE nombre = 'docente'), 'activo'),
+  ('Ana María',  'Juárez Cifuentes', '50212340005', 'DOC-2024-04', 'a.juarez@cunoc.edu.gt',        '12345',    (SELECT id FROM roles WHERE nombre = 'docente'), 'activo'),
  
   -- 4 Auxiliares
-  ('Diego',      'Hernández Cruz',   '50212340006', 'AUX-2024-01', 'd.hernandez@usac.edu.gt',      '12345',    'd7010d41-5e05-4cce-9b6e-294f0aa8f268', 'activo'),
-  ('Sofía',      'Mendoza Ávila',    '50212340007', 'AUX-2024-02', 's.mendoza@usac.edu.gt',        '12345',    'd7010d41-5e05-4cce-9b6e-294f0aa8f268', 'activo'),
-  ('Fernando',   'Castillo Ruiz',    '50212340008', 'AUX-2024-03', 'f.castillo@cunoc.edu.gt',      '12345',    'd7010d41-5e05-4cce-9b6e-294f0aa8f268', 'activo'),
-  ('Valeria',    'López Solís',      '50212340009', 'AUX-2024-04', 'v.lopez@cunoc.edu.gt',         '12345',    'd7010d41-5e05-4cce-9b6e-294f0aa8f268', 'activo'),
+  ('Diego',      'Hernández Cruz',   '50212340006', 'AUX-2024-01', 'd.hernandez@usac.edu.gt',      '12345',    (SELECT id FROM roles WHERE nombre = 'auxiliar'), 'activo'),
+  ('Sofía',      'Mendoza Ávila',    '50212340007', 'AUX-2024-02', 's.mendoza@usac.edu.gt',        '12345',    (SELECT id FROM roles WHERE nombre = 'auxiliar'), 'activo'),
+  ('Fernando',   'Castillo Ruiz',    '50212340008', 'AUX-2024-03', 'f.castillo@cunoc.edu.gt',      '12345',    (SELECT id FROM roles WHERE nombre = 'auxiliar'), 'activo'),
+  ('Valeria',    'López Solís',      '50212340009', 'AUX-2024-04', 'v.lopez@cunoc.edu.gt',         '12345',    (SELECT id FROM roles WHERE nombre = 'auxiliar'), 'activo'),
   
   -- 22 Estudiantes
   ( 'José',       'García Pérez',     '50212340010', '202400001',  'jose.garcia@usac.edu.gt',       '12345',    (SELECT id FROM roles WHERE nombre = 'estudiante'), 'activo'),
@@ -234,3 +234,141 @@ INSERT INTO curso_estudiante (curso_id, estudiante_id, estado_inscripcion, nota)
 
 
 SELECT usuarios.id ,usuarios.nombre, roles.id, roles.nombre From usuarios INNER JOIN roles ON usuarios.rol_id = roles.id WHERE roles.nombre = 'estudiante';
+
+
+
+--- poblar carrera :
+
+INSERT INTO area_tecnica (nombre, descripcion, carrera_id)
+VALUES
+('Backend',      'Desarrollo de lógica del servidor, APIs y bases de datos', '885beed6-5472-48b2-ae1c-923c7ae59c4b'),
+('Frontend',     'Interfaces de usuario y experiencia visual',               '885beed6-5472-48b2-ae1c-923c7ae59c4b'),
+('Data Science', 'Análisis de datos, modelos predictivos y visualización',   '885beed6-5472-48b2-ae1c-923c7ae59c4b'),
+('DevOps',       'Automatización, despliegue e infraestructura',             '885beed6-5472-48b2-ae1c-923c7ae59c4b');
+
+
+INSERT INTO etiquetas (nombre, uso_count)
+VALUES
+('API',             10),
+('CRUD',             8),
+('Machine Learning', 5),
+('Visualización',    6),
+('Docker',           4),
+('Autenticación',    9),
+('JWT',              7),
+('Responsive',       6);
+
+
+INSERT INTO tecnologias (nombre, descripcion)
+VALUES
+('Java',               'Lenguaje orientado a objetos ampliamente usado en backend'),
+('Spring Boot',        'Framework para crear APIs REST en Java'),
+('Python',             'Lenguaje versátil usado en backend y ciencia de datos'),
+('FastAPI',            'Framework moderno para APIs en Python'),
+('JavaScript',         'Lenguaje principal para frontend web'),
+('Vue.js',             'Framework progresivo para interfaces'),
+('Docker',             'Contenedores para despliegue de aplicaciones'),
+('PostgreSQL',         'Sistema de gestión de bases de datos relacional');
+
+
+
+INSERT INTO proyectos ( autor_id, curso_id, titulo, descripcion, area_tecnica, estado, destacado, destacado_por , vistas, rating )
+VALUES
+(
+    'f3348019-d8bc-48cc-8cfd-0a407f1e124a',
+    '0bdf7f3f-0548-455f-92d1-12903935cd8a',
+    'API REST de Gestión de Tareas',
+    'Sistema backend con autenticación JWT para gestión de tareas con CRUD completo.',
+    (SELECT id FROM area_tecnica WHERE nombre = 'Backend'),
+    'publicado',
+    true,
+    '5b871b5d-6335-4978-b1f1-1733b45a5ed3',
+    120,
+    4.5
+),
+(
+    'd6485cf2-8ccb-42ff-87fe-cc5a613c7fdf',
+    '2ccddef7-f2b4-4720-bb49-7d8c875c0f27',
+    'Dashboard de Ventas',
+    'Aplicación frontend para visualización de métricas de ventas en tiempo real.',
+    (SELECT id FROM area_tecnica WHERE nombre = 'Frontend'),
+    'publicado',
+    false,
+    '5b871b5d-6335-4978-b1f1-1733b45a5ed3',
+    85,
+    4.2
+),
+(
+    '19455bda-50c7-4153-8eaa-5326371f16cd',
+    '2ccddef7-f2b4-4720-bb49-7d8c875c0f27',
+    'Modelo Predictivo de Precios',
+    'Modelo de machine learning para predicción de precios de viviendas.',
+    (SELECT id FROM area_tecnica WHERE nombre = 'Data Science'),
+    'publicado',
+    true,
+    '9f53c2c0-f743-4544-8dc8-7b04bcf64aba',
+    200,
+    4.8
+),
+(
+    '680a1856-75b3-4878-8b9c-ab12d5a7ebee',
+    '0bdf7f3f-0548-455f-92d1-12903935cd8a',
+    'CI/CD con Docker',
+    'Pipeline automatizado para despliegue usando Docker y GitHub Actions.',
+    (SELECT id FROM area_tecnica WHERE nombre = 'DevOps'),
+    'publicado',
+    false,
+    '9f53c2c0-f743-4544-8dc8-7b04bcf64aba',
+    60,
+    4.0
+);
+
+
+INSERT INTO proyecto_etiqueta (proyecto_id, etiqueta_id)
+SELECT p.id, e.id
+FROM proyectos p, etiquetas e
+WHERE p.titulo = 'API REST de Gestión de Tareas'
+  AND e.nombre IN ('API', 'CRUD', 'JWT', 'Autenticación');
+
+INSERT INTO proyecto_etiqueta (proyecto_id, etiqueta_id)
+SELECT p.id, e.id
+FROM proyectos p, etiquetas e
+WHERE p.titulo = 'Dashboard de Ventas'
+  AND e.nombre IN ('Visualización', 'Responsive');
+
+INSERT INTO proyecto_etiqueta (proyecto_id, etiqueta_id)
+SELECT p.id, e.id
+FROM proyectos p, etiquetas e
+WHERE p.titulo = 'Modelo Predictivo de Precios'
+  AND e.nombre IN ('Machine Learning');
+
+INSERT INTO proyecto_etiqueta (proyecto_id, etiqueta_id)
+SELECT p.id, e.id
+FROM proyectos p, etiquetas e
+WHERE p.titulo = 'CI/CD con Docker'
+  AND e.nombre IN ('Docker');
+
+
+  INSERT INTO proyecto_tecnologia (proyecto_id, tecnologia_id)
+SELECT p.id, t.id
+FROM proyectos p, tecnologias t
+WHERE p.titulo = 'API REST de Gestión de Tareas'
+  AND t.nombre IN ('Java', 'Spring Boot', 'PostgreSQL');
+
+INSERT INTO proyecto_tecnologia (proyecto_id, tecnologia_id)
+SELECT p.id, t.id
+FROM proyectos p, tecnologias t
+WHERE p.titulo = 'Dashboard de Ventas'
+  AND t.nombre IN ('JavaScript', 'Vue.js');
+
+INSERT INTO proyecto_tecnologia (proyecto_id, tecnologia_id)
+SELECT p.id, t.id
+FROM proyectos p, tecnologias t
+WHERE p.titulo = 'Modelo Predictivo de Precios'
+  AND t.nombre IN ('Python');
+
+INSERT INTO proyecto_tecnologia (proyecto_id, tecnologia_id)
+SELECT p.id, t.id
+FROM proyectos p, tecnologias t
+WHERE p.titulo = 'CI/CD con Docker'
+  AND t.nombre IN ('Docker');

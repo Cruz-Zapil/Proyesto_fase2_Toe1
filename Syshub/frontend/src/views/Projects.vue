@@ -7,7 +7,7 @@
         <p class="text-gray-600">Descubre, comparte y colabora en proyectos académicos</p>
       </div>
       <router-link
-        to="/login"
+        to="/projects/new"
         class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors"
       >
         + Nuevo Proyecto
@@ -34,11 +34,9 @@
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           >
             <option value="">Todas las categorías</option>
-            <option value="web">Desarrollo Web</option>
-            <option value="mobile">Mobile</option>
-            <option value="backend">Backend</option>
-            <option value="ia">Inteligencia Artificial</option>
-            <option value="otro">Otro</option>
+            <option v-for="category in categoryOptions" :key="category.id" :value="category.id">
+              {{ category.nombre }}
+            </option>
           </select>
         </div>
 
@@ -57,23 +55,40 @@
     </div>
 
     <!-- Empty State -->
-    <div v-if="!projects.length" class="bg-gray-100 rounded-lg p-12 text-center">
+    <div v-if="loading" class="bg-gray-100 rounded-lg p-12 text-center">
+      <div class="text-4xl mb-4 animate-pulse">⏳</div>
+      <h3 class="text-2xl font-bold mb-2">Cargando proyectos</h3>
+      <p class="text-gray-600">Un momento mientras traemos la información desde la base de datos</p>
+    </div>
+
+    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-12 text-center text-red-700">
+      <h3 class="text-2xl font-bold mb-2">No se pudieron cargar los proyectos</h3>
+      <p>{{ error }}</p>
+    </div>
+
+    <div v-else-if="!projects.length" class="bg-gray-100 rounded-lg p-12 text-center">
       <div class="text-6xl mb-4">🎓</div>
       <h3 class="text-2xl font-bold mb-2">No hay proyectos aún</h3>
       <p class="text-gray-600 mb-6">Sé el primero en compartir un proyecto con la comunidad</p>
       <router-link
-        to="/login"
+        to="/projects/new"
         class="inline-block px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors"
       >
-        Iniciar Sesión para Crear Proyecto
+        Crear primer proyecto
       </router-link>
+    </div>
+
+    <div v-else-if="!filteredProjects.length" class="bg-gray-100 rounded-lg p-12 text-center">
+      <div class="text-6xl mb-4">🔎</div>
+      <h3 class="text-2xl font-bold mb-2">No encontramos coincidencias</h3>
+      <p class="text-gray-600">Prueba con otro nombre, categoría o criterio de ordenamiento</p>
     </div>
 
     <!-- Projects Grid -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
         v-for="(project, index) in filteredProjects"
-        :key="index"
+        :key="project.id || index"
         class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
       >
         <!-- Project Header -->
@@ -97,6 +112,10 @@
             </span>
           </div>
 
+          <p v-if="project.categoryName" class="text-sm text-gray-500 mb-4">
+            Categoría: <span class="font-semibold text-gray-700">{{ project.categoryName }}</span>
+          </p>
+
           <!-- Stats -->
           <div class="grid grid-cols-2 gap-4 text-center py-4 border-t border-gray-200">
             <div>
@@ -105,7 +124,7 @@
             </div>
             <div>
               <div class="text-2xl font-bold text-purple-600">{{ project.collaborators }}</div>
-              <p class="text-xs text-gray-600">👥 Colaboradores</p>
+              <p class="text-xs text-gray-600">👥 Vistas</p>
             </div>
           </div>
         </div>
@@ -126,13 +145,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { getProjects } from '@/api/projects'
+import { getProjects, getAreasTecnicas } from '@/api/projects'
 
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const sortBy = ref('recent')
 
 const projects = ref<any[]>([])
+const categoryOptions = ref<any[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 
@@ -140,17 +160,21 @@ async function load() {
   loading.value = true
   error.value = null
   try {
-    const data = await getProjects()
+    const [projectsData, areasData] = await Promise.all([getProjects(), getAreasTecnicas()])
+
+    categoryOptions.value = areasData
+
     // Map backend fields to UI-friendly shape
-    projects.value = data.map((p: any) => ({
+    projects.value = projectsData.map((p: any) => ({
       id: p.id,
       name: p.titulo || p.nombre || 'Sin título',
-      author: p.autorId || 'Desconocido',
+      author: [p.autorNombre, p.autorApellidos].filter(Boolean).join(' ') || p.autorId || 'Desconocido',
       description: p.descripcion || '',
       tags: p.stack_tecnologico ? p.stack_tecnologico.split(',').map((s: string) => s.trim()) : [],
       stars: p.rating || 0,
       collaborators: p.vistas || 0,
-      category: p.area_tecnica || ''
+      category: p.areaTecnicaId || '',
+      categoryName: p.areaTecnicaNombre || ''
     }))
   } catch (err: any) {
     error.value = err.message || 'Error al cargar proyectos'

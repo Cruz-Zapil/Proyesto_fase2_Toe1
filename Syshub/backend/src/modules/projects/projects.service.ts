@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Project } from './projects.entity';
 
 @Injectable()
@@ -8,32 +8,119 @@ export class ProjectsService {
   constructor(
     @InjectRepository(Project)
     private projectsRepository: Repository<Project>,
+    private dataSource: DataSource,
   ) {}
 
   // Lista proyectos publicados, ordenados por fecha
-  findAll() {
-    return this.projectsRepository.find({
-      where: { estado: 'publicado' },
-      order: { created_at: 'DESC' },
-    });
+  async findAll() {
+    return this.dataSource.query(`
+      SELECT
+        p.id,
+        p.autor_id AS "autorId",
+        u.nombre AS "autorNombre",
+        u.apellidos AS "autorApellidos",
+        p.curso_id AS "cursoId",
+        p.titulo,
+        p.descripcion,
+        p.area_tecnica AS "areaTecnicaId",
+        at.nombre AS "areaTecnicaNombre",
+        p.estado,
+        p.visibilidad,
+        p.destacado,
+        p.destacado_por AS "destacadoPor",
+        p.vistas,
+        p.rating,
+        p.created_at AS "created_at",
+        p.updated_at AS "updated_at"
+      FROM proyectos p
+      LEFT JOIN usuarios u ON u.id = p.autor_id
+      LEFT JOIN area_tecnica at ON at.id = p.area_tecnica
+      WHERE p.estado = 'publicado'
+      ORDER BY p.created_at DESC
+    `);
   }
 
   // Busca un proyecto por UUID, lanza 404 si no existe
   async findOne(id: string) {
-    const project = await this.projectsRepository.findOne({ where: { id } });
-    if (!project) throw new NotFoundException('Proyecto no encontrado');
-    return project;
+    const project = await this.dataSource.query(
+      `
+      SELECT
+        p.id,
+        p.autor_id AS "autorId",
+        u.nombre AS "autorNombre",
+        u.apellidos AS "autorApellidos",
+        p.curso_id AS "cursoId",
+        p.titulo,
+        p.descripcion,
+        p.area_tecnica AS "areaTecnicaId",
+        at.nombre AS "areaTecnicaNombre",
+        p.estado,
+        p.visibilidad,
+        p.destacado,
+        p.destacado_por AS "destacadoPor",
+        p.vistas,
+        p.rating,
+        p.created_at AS "created_at",
+        p.updated_at AS "updated_at"
+      FROM proyectos p
+      LEFT JOIN usuarios u ON u.id = p.autor_id
+      LEFT JOIN area_tecnica at ON at.id = p.area_tecnica
+      WHERE p.id = $1
+      LIMIT 1
+    `,
+      [id],
+    );
+
+    if (!project.length) throw new NotFoundException('Proyecto no encontrado');
+    return project[0];
   }
 
-  // Crea un proyecto nuevo — el autorId viene del token JWT (no del body)
-  async create(data: Partial<Project>) {
-    const project = this.projectsRepository.create(data);
-    return this.projectsRepository.save(project);
+  // Crea un proyecto nuevo con etiquetas y tecnologías
+  async create(data: Partial<Project> & { etiquetaIds?: string[]; tecnologiaIds?: string[] }) {
+    const { etiquetaIds, tecnologiaIds, ...projectData } = data;
+    
+    const project = this.projectsRepository.create(projectData);
+    const savedProject = await this.projectsRepository.save(project);
+
+    // Vincular etiquetas si existen
+    if (etiquetaIds && etiquetaIds.length > 0) {
+      await this.attachEtiquetas(savedProject.id, etiquetaIds);
+    }
+
+    // Vincular tecnologías si existen
+    if (tecnologiaIds && tecnologiaIds.length > 0) {
+      await this.attachTecnologias(savedProject.id, tecnologiaIds);
+    }
+
+    return this.findOne(savedProject.id);
   }
 
   // Actualiza solo los campos enviados
-  async update(id: string, data: Partial<Project>) {
-    await this.projectsRepository.update(id, data);
+  async update(id: string, data: Partial<Project> & { etiquetaIds?: string[]; tecnologiaIds?: string[] }) {
+    const { etiquetaIds, tecnologiaIds, ...projectData } = data;
+    
+    await this.projectsRepository.update(id, projectData);
+
+    // Actualizar etiquetas si se proporciona
+    if (etiquetaIds) {
+      // Limpiar etiquetas existentes
+      await this.dataSource.query(`DELETE FROM proyecto_etiqueta WHERE proyecto_id = $1`, [id]);
+      // Agregar nuevas
+      if (etiquetaIds.length > 0) {
+        await this.attachEtiquetas(id, etiquetaIds);
+      }
+    }
+
+    // Actualizar tecnologías si se proporciona
+    if (tecnologiaIds) {
+      // Limpiar tecnologías existentes
+      await this.dataSource.query(`DELETE FROM proyecto_tecnologia WHERE proyecto_id = $1`, [id]);
+      // Agregar nuevas
+      if (tecnologiaIds.length > 0) {
+        await this.attachTecnologias(id, tecnologiaIds);
+      }
+    }
+
     return this.findOne(id);
   }
 
@@ -41,5 +128,74 @@ export class ProjectsService {
   async remove(id: string) {
     await this.projectsRepository.update(id, { estado: 'archivado' });
     return { message: 'Proyecto archivado correctamente' };
+  }
+
+  async getAreasTecnicas() {
+    return this.dataSource.query(`
+      SELECT id, nombre, descripcion
+      FROM area_tecnica
+      ORDER BY nombre ASC
+    `);
+  }
+
+  // Obtiene todas las etiquetas disponibles
+  async getEtiquetas() {
+    return this.dataSource.query(`
+      SELECT id, nombre, uso_count AS "usoCount"
+      FROM etiquetas
+      ORDER BY nombre ASC
+    `);
+  }
+
+  // Obtiene todas las tecnologías disponibles
+  async getTecnologias() {
+    return this.dataSource.query(`
+      SELECT id, nombre, descripcion
+      FROM tecnologias
+      ORDER BY nombre ASC
+    `);
+  }
+
+  // Obtiene cursos asociados a un usuario (docente o estudiante)
+  async getCursosForUser(userId: string) {
+    return this.dataSource.query(
+      `
+      SELECT DISTINCT c.id, c.nombre
+      FROM cursos c
+      LEFT JOIN curso_docente cd ON cd.curso_id = c.id
+      LEFT JOIN curso_estudiante ce ON ce.curso_id = c.id
+      WHERE cd.docente_id = $1 OR ce.estudiante_id = $1
+      ORDER BY c.nombre ASC
+    `,
+      [userId],
+    );
+  }
+
+  // Vincula etiquetas a un proyecto
+  private async attachEtiquetas(projectId: string, etiquetaIds: string[]) {
+    for (const etiquetaId of etiquetaIds) {
+      await this.dataSource.query(
+        `
+        INSERT INTO proyecto_etiqueta (proyecto_id, etiqueta_id)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+      `,
+        [projectId, etiquetaId],
+      );
+    }
+  }
+
+  // Vincula tecnologías a un proyecto
+  private async attachTecnologias(projectId: string, tecnologiaIds: string[]) {
+    for (const tecId of tecnologiaIds) {
+      await this.dataSource.query(
+        `
+        INSERT INTO proyecto_tecnologia (proyecto_id, tecnologia_id)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+      `,
+        [projectId, tecId],
+      );
+    }
   }
 }

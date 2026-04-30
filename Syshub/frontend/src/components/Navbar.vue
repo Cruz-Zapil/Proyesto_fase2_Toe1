@@ -42,12 +42,7 @@
 
         <!-- Botones de Autenticación -->
         <div class="flex gap-4 items-center">
-          <button
-            @click="scrollToSection('caracteristicas')"
-            class="hidden md:block text-gray-700 hover:text-blue-600 transition font-medium"
-          >
-            Características
-          </button>
+
           <template v-if="!isAuthenticated">
             <router-link
               to="/login"

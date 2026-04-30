@@ -17,9 +17,6 @@ export class Project {
   @Column({ type: 'text' })
   descripcion: string;
 
-  @Column({ name: 'stack_tecnologico', length: 255, nullable: true })
-  stackTecnologico: string;
-
   @Column({ name: 'area_tecnica', length: 100, nullable: true })
   areaTecnica: string;
 

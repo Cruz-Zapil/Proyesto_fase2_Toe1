@@ -235,6 +235,7 @@ CREATE TABLE proyectos (
     titulo VARCHAR(255) NOT NULL,
     descripcion TEXT NOT NULL,
     area_tecnica UUID REFERENCES area_tecnica(id) ON DELETE SET NULL,
+    visibilidad VARCHAR(50) DEFAULT 'publico' CHECK (visibilidad IN ('publico', 'privado')),
     estado VARCHAR(50) DEFAULT 'borrador'
         CHECK (estado IN ('borrador', 'publicado', 'archivado')),
     destacado BOOLEAN DEFAULT false,
