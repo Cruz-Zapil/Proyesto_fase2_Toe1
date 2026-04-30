@@ -48,18 +48,40 @@
           >
             Características
           </button>
-          <router-link
-            to="/login"
-            class="px-6 py-2 text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition"
-          >
-            Iniciar Sesión
-          </router-link>
-          <router-link
-            to="/register"
-            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-md"
-          >
-            Registrarse
-          </router-link>
+          <template v-if="!isAuthenticated">
+            <router-link
+              to="/login"
+              class="px-6 py-2 text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition"
+            >
+              Iniciar Sesión
+            </router-link>
+            <router-link
+              to="/register"
+              class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-md"
+            >
+              Registrarse
+            </router-link>
+          </template>
+          <template v-else>
+            <router-link
+              to="/my-content"
+              class="text-gray-700 hover:text-blue-600 transition font-medium px-4 py-2"
+            >
+              Mi contenido
+            </router-link>
+            <router-link
+              to="/profile"
+              class="text-gray-700 hover:text-blue-600 transition font-medium px-4 py-2"
+            >
+              Mi perfil
+            </router-link>
+            <button
+              @click="handleLogout"
+              class="px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition"
+            >
+              Cerrar sesión
+            </button>
+          </template>
         </div>
       </div>
     </div>
@@ -67,18 +89,25 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
 
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
 
-const isActive = (path: string) => {
-  return route.path === path
-}
+const isActive = (path: string) => route.path === path
 
 const scrollToSection = (id: string) => {
   const element = document.getElementById(id)
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' })
-  }
+  if (element) element.scrollIntoView({ behavior: 'smooth' })
+}
+
+const isAuthenticated = computed(() => !!auth.isAuthenticated)
+
+const handleLogout = () => {
+  auth.logout()
+  router.push('/')
 }
 </script>

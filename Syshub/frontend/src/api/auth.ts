@@ -23,6 +23,27 @@ export async function login(email: string, password: string) {
   return data;
 }
 
+
+export async function getMe() {
+  const token = localStorage.getItem('token')
+
+  const res = await fetch(`${API_URL}/users/me`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  const data = await res.json()
+
+  if (!res.ok) {
+    throw new Error(data.message || 'Error al obtener usuario')
+  }
+
+  return data
+}
+
+
 export async function registerUser(data: {
   nombre: string
   apellidos: string

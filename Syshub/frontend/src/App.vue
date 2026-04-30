@@ -12,7 +12,8 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
             <h3 class="text-2xl font-bold mb-4">Syshub</h3>
-            <p class="text-gray-400">Ecosistema digital de aprendizaje continuo para la Facultad de Ingeniería en Sistemas</p>
+            <p class="text-gray-400">Ecosistema digital de aprendizaje continuo para la Facultad de Ingeniería en
+              Sistemas</p>
           </div>
           <div>
             <h4 class="text-lg font-bold mb-4">Enlaces</h4>

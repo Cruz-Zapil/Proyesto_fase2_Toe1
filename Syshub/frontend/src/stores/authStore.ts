@@ -2,15 +2,13 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { login as apiLogin } from '../api/auth'
 import { getMe } from '../api/users'
-import { l } from 'node_modules/vite/dist/node/types.d-aGj9QkWt'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<any>(null)
   const token = ref<string | null>(localStorage.getItem('token'))
-
   const isAuthenticated = ref(!!token.value)
 
-  // 🔐 LOGIN REAL
+  // 🔐 LOGIN
   async function login(email: string, password: string) {
     const data = await apiLogin(email, password)
 
@@ -21,11 +19,12 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = data.access_token
     localStorage.setItem('token', data.access_token)
 
-    user.value = data.user
-    isAuthenticated.value = true
+    // ⚠️ OJO: aquí no siempre viene el user
+    // mejor lo traemos del backend
+    await loadUser()
   }
 
-  // 👤 TRAER USUARIO DESDE BACKEND
+  // 👤 Cargar usuario desde backend
   async function loadUser() {
     if (!token.value) return
 
@@ -44,9 +43,6 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated.value = false
     localStorage.removeItem('token')
   }
-
-
-
 
   return {
     user,

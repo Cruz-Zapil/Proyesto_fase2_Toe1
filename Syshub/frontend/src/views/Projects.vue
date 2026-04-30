@@ -125,45 +125,43 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getProjects } from '@/api/projects'
 
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const sortBy = ref('recent')
 
-// Mock data - Será reemplazado por llamadas a la API
-const projects = ref([
-  {
-    id: 1,
-    name: 'E-Commerce Platform',
-    author: 'Juan Pérez',
-    description: 'Plataforma de comercio electrónico construida con Vue 3 y NestJS',
-    tags: ['Vue.js', 'NestJS', 'PostgreSQL'],
-    stars: 45,
-    collaborators: 8,
-    category: 'web'
-  },
-  {
-    id: 2,
-    name: 'Chat App Real-time',
-    author: 'María García',
-    description: 'Aplicación de chat en tiempo real con WebSockets',
-    tags: ['React', 'Node.js', 'Socket.io'],
-    stars: 32,
-    collaborators: 5,
-    category: 'backend'
-  },
-  {
-    id: 3,
-    name: 'Mobile App',
-    author: 'Carlos López',
-    description: 'Aplicación móvil para gestión de tareas',
-    tags: ['React Native', 'Firebase'],
-    stars: 28,
-    collaborators: 3,
-    category: 'mobile'
+const projects = ref<any[]>([])
+const loading = ref(false)
+const error = ref<string | null>(null)
+
+async function load() {
+  loading.value = true
+  error.value = null
+  try {
+    const data = await getProjects()
+    // Map backend fields to UI-friendly shape
+    projects.value = data.map((p: any) => ({
+      id: p.id,
+      name: p.titulo || p.nombre || 'Sin título',
+      author: p.autorId || 'Desconocido',
+      description: p.descripcion || '',
+      tags: p.stack_tecnologico ? p.stack_tecnologico.split(',').map((s: string) => s.trim()) : [],
+      stars: p.rating || 0,
+      collaborators: p.vistas || 0,
+      category: p.area_tecnica || ''
+    }))
+  } catch (err: any) {
+    error.value = err.message || 'Error al cargar proyectos'
+  } finally {
+    loading.value = false
   }
-])
+}
+
+onMounted(() => {
+  load()
+})
 
 const filteredProjects = computed(() => {
   let filtered = projects.value
