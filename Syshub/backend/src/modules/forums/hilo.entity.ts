@@ -17,9 +17,6 @@ export class Hilo {
   @Column({ type: 'text' })
   contenido: string;
 
-  @Column({ length: 100, nullable: true })
-  categoria: string;
-
   @Column({ default: 'abierto' })
   estado: string;
 

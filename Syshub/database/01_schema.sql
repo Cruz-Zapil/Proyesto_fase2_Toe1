@@ -176,7 +176,6 @@ CREATE TABLE hilos (
     curso_id UUID REFERENCES cursos(id) ON DELETE SET NULL,
     titulo VARCHAR(255) NOT NULL,
     contenido TEXT NOT NULL,
-    categoria VARCHAR(100),
     estado VARCHAR(50) DEFAULT 'abierto' CHECK (estado IN ('abierto', 'resuelto', 'cerrado')),
     vistas INTEGER DEFAULT 0,
     score INTEGER DEFAULT 0,
@@ -202,6 +201,11 @@ CREATE TABLE comentarios (
 );
 
 
+CREATE TABLE hilo_etiquetas (
+    hilo_id UUID REFERENCES hilos(id) ON DELETE CASCADE,
+    etiqueta_id UUID REFERENCES etiquetas(id) ON DELETE CASCADE,
+    PRIMARY KEY (hilo_id, etiqueta_id)
+);
 
 
 
@@ -291,7 +295,6 @@ CREATE TABLE articulos (
     contenido_html TEXT NOT NULL,
     resumen TEXT,
     imagen_portada VARCHAR(500),
-    categoria VARCHAR(100),
     publicado BOOLEAN DEFAULT false,
     vistas INTEGER DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
