@@ -20,6 +20,9 @@ export class Project {
   @Column({ name: 'area_tecnica', length: 100, nullable: true })
   areaTecnica: string;
 
+  @Column({ default: 'publico' })
+  visibilidad: string;
+
   @Column({ default: 'borrador' })
   estado: string;
 

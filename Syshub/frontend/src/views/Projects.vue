@@ -95,6 +95,10 @@
         <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 text-white">
           <h3 class="text-xl font-bold">{{ project.name }}</h3>
           <p class="text-sm opacity-90">por {{ project.author }}</p>
+          <div class="mt-2 flex flex-wrap gap-2 text-xs">
+            <span class="px-2 py-1 rounded-full bg-white/20">{{ project.statusLabel }}</span>
+            <span class="px-2 py-1 rounded-full bg-white/20">{{ project.visibilityLabel }}</span>
+          </div>
         </div>
 
         <!-- Project Body -->
@@ -131,9 +135,9 @@
 
         <!-- Project Footer -->
         <div class="px-6 py-4 bg-gray-50 border-t flex gap-2">
-          <button class="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-semibold">
+          <router-link :to="`/projects/${project.id}`" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-semibold text-center">
             Ver Proyecto
-          </button>
+          </router-link>
           <button class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors text-sm font-semibold">
             ⭐ Guardar
           </button>
@@ -174,7 +178,9 @@ async function load() {
       stars: p.rating || 0,
       collaborators: p.vistas || 0,
       category: p.areaTecnicaId || '',
-      categoryName: p.areaTecnicaNombre || ''
+        categoryName: p.areaTecnicaNombre || '',
+        statusLabel: p.estado ? `Estado: ${p.estado}` : 'Estado: sin definir',
+        visibilityLabel: p.visibilidad ? `Visibilidad: ${p.visibilidad}` : 'Visibilidad: sin definir',
     }))
   } catch (err: any) {
     error.value = err.message || 'Error al cargar proyectos'

@@ -116,6 +116,19 @@
             </div>
             <p class="text-xs text-gray-500 mt-2">{{ form.etiquetaIds.length }} seleccionadas</p>
           </div>
+
+          <!-- Archivos -->
+          <div class="md:col-span-2 mt-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Archivos </label>
+            <input type="file" multiple @change="onFilesChange" class="w-full" />
+            <div v-if="selectedFiles.length" class="mt-2 space-y-1">
+              <div v-for="(f, i) in selectedFiles" :key="i" class="text-sm text-gray-700">
+                {{ f.name }} — {{ Math.round(f.size/1024) }} KB
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">Se subirán los archivos después de crear el proyecto.</p>
+          </div>
+
         </div>
       </div>
 
@@ -186,6 +199,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createProject, getAreasTecnicas, getEtiquetas, getTecnologias, getMisCursos } from '@/api/projects'
+import API_URL from '@/api/api'
 
 const router = useRouter()
 const loading = ref(false)
@@ -194,6 +208,7 @@ const areasTecnicas = ref<any[]>([])
 const etiquetas = ref<any[]>([])
 const tecnologias = ref<any[]>([])
 const misCursos = ref<any[]>([])
+const selectedFiles = ref<File[]>([])
 
 const form = reactive({
   titulo: '',
@@ -224,6 +239,33 @@ async function loadData() {
   }
 }
 
+function onFilesChange(e: Event) {
+  const input = e.target as HTMLInputElement
+  if (!input.files) return
+  selectedFiles.value = Array.from(input.files)
+}
+
+async function uploadFiles(projectId: string) {
+  if (!selectedFiles.value.length) return
+  const token = localStorage.getItem('token')
+
+  for (const file of selectedFiles.value) {
+    const fd = new FormData()
+    fd.append('file', file)
+
+    const res = await fetch(`${API_URL}/projects/${projectId}/files`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      body: fd,
+    })
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.message || 'Error subiendo archivos')
+    }
+  }
+}
+
 async function handleSubmit() {
   loading.value = true
   error.value = null
@@ -247,7 +289,7 @@ async function handleSubmit() {
     return
   }
 
-  try {
+    try {
     const payload = {
       titulo: form.titulo.trim(),
       descripcion: form.descripcion.trim(),
@@ -259,7 +301,13 @@ async function handleSubmit() {
       tecnologiaIds: form.tecnologiaIds,
     }
 
-    await createProject(payload)
+    const created = await createProject(payload)
+
+    // Si seleccionó archivos, subirlos al endpoint de archivos
+    if (selectedFiles.value.length) {
+      await uploadFiles(created.id)
+    }
+
     router.push('/projects')
   } catch (err: any) {
     error.value = err.message || 'No se pudo crear el proyecto'

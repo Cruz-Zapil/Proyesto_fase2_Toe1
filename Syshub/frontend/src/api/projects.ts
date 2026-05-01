@@ -56,6 +56,20 @@ export async function getTecnologias() {
   return data
 }
 
+export async function getProjectFiles(projectId: string) {
+  const res = await fetch(`${API_URL}/projects/${projectId}/files`, {
+    headers: getHeaders(),
+  })
+
+  const data = await res.json()
+
+  if (!res.ok) {
+    throw new Error(data.message || 'Error al obtener archivos del proyecto')
+  }
+
+  return data
+}
+
 export async function getMisCursos() {
   const res = await fetch(`${API_URL}/projects/mis-cursos`, {
     headers: getHeaders(true),

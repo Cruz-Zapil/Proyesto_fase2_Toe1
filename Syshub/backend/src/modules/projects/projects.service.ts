@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Project } from './projects.entity';
+import { unlinkSync, existsSync } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class ProjectsService {
@@ -11,7 +13,7 @@ export class ProjectsService {
     private dataSource: DataSource,
   ) {}
 
-  // Lista proyectos publicados, ordenados por fecha
+  // Lista solo proyectos publicados y de visibilidad pública
   async findAll() {
     return this.dataSource.query(`
       SELECT
@@ -36,8 +38,62 @@ export class ProjectsService {
       LEFT JOIN usuarios u ON u.id = p.autor_id
       LEFT JOIN area_tecnica at ON at.id = p.area_tecnica
       WHERE p.estado = 'publicado'
+        AND p.visibilidad = 'publico'
       ORDER BY p.created_at DESC
     `);
+  }
+
+  // Guarda metadata de un archivo asociado a un proyecto
+  async saveArchivo(
+    proyectoId: string,
+    nombreOriginal: string,
+    urlStorage: string,
+    tipoMime: string,
+    tamanoBytes: number,
+  ) {
+    const res = await this.dataSource.query(
+      `
+      INSERT INTO archivos_proyecto (proyecto_id, nombre_original, url_storage, tipo_mime, tamano_bytes)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *
+    `,
+      [proyectoId, nombreOriginal, urlStorage, tipoMime, tamanoBytes],
+    );
+
+    return res[0];
+  }
+
+  // Lista archivos de un proyecto
+  async listArchivos(proyectoId: string) {
+    return this.dataSource.query(`SELECT * FROM archivos_proyecto WHERE proyecto_id = $1 ORDER BY created_at DESC`, [proyectoId]);
+  }
+
+  // Elimina metadata y archivo del FS (si existe)
+  async removeArchivo(fileId: string) {
+    const rows = await this.dataSource.query(`SELECT url_storage FROM archivos_proyecto WHERE id = $1`, [fileId]);
+    if (!rows.length) throw new NotFoundException('Archivo no encontrado');
+    const url = rows[0].url_storage as string;
+
+    // Intentar borrar archivo en disco si la ruta es relativa
+    try {
+      const rel = url.replace(/^\//, '');
+      const p = join(process.cwd(), rel);
+      if (existsSync(p)) {
+        unlinkSync(p);
+      }
+    } catch (err) {
+      // Ignorar errores de borrado físico
+    }
+
+    await this.dataSource.query(`DELETE FROM archivos_proyecto WHERE id = $1`, [fileId]);
+    return { message: 'Archivo eliminado' };
+  }
+
+  // Verifica si un usuario es dueño del proyecto
+  async isProjectOwner(projectId: string, userId: string) {
+    const rows = await this.dataSource.query(`SELECT autor_id FROM proyectos WHERE id = $1`, [projectId]);
+    if (!rows.length) return false;
+    return rows[0].autor_id === userId;
   }
 
   // Busca un proyecto por UUID, lanza 404 si no existe

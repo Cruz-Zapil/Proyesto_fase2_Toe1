@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import * as express from 'express';
+import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -26,6 +28,9 @@ async function bootstrap() {
 
   // Versionado de API
   app.setGlobalPrefix('api/v1');
+
+  // Servir archivos cargados en /uploads para que otros usuarios puedan abrirlos
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
   const port = process.env.API_PORT || 3000;
   await app.listen(port);
