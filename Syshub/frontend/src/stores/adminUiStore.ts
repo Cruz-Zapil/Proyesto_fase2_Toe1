@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 
 export type AdminSection =
   | 'overview'
+  | 'moderation'
   | 'users'
   | 'division'
   | 'career'

@@ -19,6 +19,7 @@ import { DivisionesModule } from "./modules/division/division.module";
 // Config
 import { typeOrmConfig } from "./config/typeorm.config";
 import { CursoModule } from "./modules/curso/curso.module";
+import { ModerationModule } from "./modules/moderation/moderation.module";
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { CursoModule } from "./modules/curso/curso.module";
     CarrerasModule,
     CursoModule,
     ArticulosModule,
+    ModerationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

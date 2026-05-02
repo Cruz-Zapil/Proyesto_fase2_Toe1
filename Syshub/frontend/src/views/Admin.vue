@@ -346,12 +346,17 @@
           </div>
         </section>
       </template>
-    </main>
+    
+        <- Moderation Panel -->
+        <ModerationPanel v-if="currentSection === 'moderation'" />
+  
+      </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import ModerationPanel from '../components/ModerationPanel.vue'
 import { useAdminUiStore, type AdminSection } from '@/stores/adminUiStore'
 import {
   approveStudentRequest as approveStudentRequestApi,
@@ -459,6 +464,7 @@ const duplicateOfferMessage = computed(() =>
 )
 
 const menuItems: { key: AdminSection; label: string; description: string; icon: string }[] = [
+  { key: 'moderation', label: 'Moderación', description: 'Contenidos ocultos', icon: '🛡️' },
   { key: 'overview', label: 'Resumen', description: 'Vista general y pendientes', icon: '📊' },
   { key: 'users', label: 'Usuarios', description: 'Tabla y estados de usuarios', icon: '👥' },
   { key: 'division', label: 'División', description: 'Crear división académica', icon: '🏛️' },

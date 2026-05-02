@@ -262,6 +262,7 @@ CREATE TABLE hilos (
     estado VARCHAR(50) DEFAULT 'abierto' CHECK (estado IN ('abierto', 'resuelto', 'cerrado')),
     vistas INTEGER DEFAULT 0,
     score INTEGER DEFAULT 0,
+    oculto BOOLEAN DEFAULT false,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT hilos_titulo_no_vacio CHECK (LENGTH(titulo) >= 5)
@@ -329,6 +330,7 @@ CREATE TABLE proyectos (
     destacado_por UUID REFERENCES usuarios(id) ON DELETE SET NULL,
     vistas INTEGER DEFAULT 0,
     rating DECIMAL(3,2) DEFAULT 0.0,
+    oculto BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );

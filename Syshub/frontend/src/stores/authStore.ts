@@ -28,6 +28,12 @@ export const useAuthStore = defineStore('auth', () => {
            roleName.value.includes('administrador')
   })
 
+  // 🔐 Saber si es moderador
+  const isModerator = computed(() => {
+    return roleName.value === 'moderador' ||
+           roleName.value.includes('moderador')
+  })
+
   // 🔐 LOGIN
   async function login(email: string, password: string) {
     const data = await apiLogin(email, password)
@@ -89,6 +95,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     roleName,
     isAdmin,
+    isModerator,
     login,
     loadUser,
     logout,
