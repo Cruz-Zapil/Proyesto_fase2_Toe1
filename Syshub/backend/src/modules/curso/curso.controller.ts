@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseUUIDPipe, Post, UseGuards, Request } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards, Request } from "@nestjs/common";
 import { CursoService } from "./curso.service";
 import { CarrerasService } from "../carreras/carreras.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -33,9 +33,10 @@ findEstudiantes(@Param('id', new ParseUUIDPipe()) id: string) {
 @Post(':id/inscribir')
 inscribir(
   @Param('id', ParseUUIDPipe) cursoId: string,
-  @Request() req: any
+  @Request() req: any,
+  @Body() body: { ofertaId?: string },
 ) {
-  return this.cursoService.inscribirUsuario(cursoId, req.user.sub);
+  return this.cursoService.inscribirUsuario(cursoId, req.user.sub, body?.ofertaId);
 }
 
 @Get(':id/oferta')

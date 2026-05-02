@@ -149,6 +149,7 @@ CREATE TABLE curso_docente (
     curso_id UUID NOT NULL REFERENCES cursos(id) ON DELETE CASCADE,
     docente_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     rol_docente rol_docente_enum NOT NULL,
+    oferta_id UUID REFERENCES curso_oferta(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(curso_id, docente_id, rol_docente)
 );
@@ -158,11 +159,20 @@ CREATE TABLE curso_estudiante (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     curso_id UUID NOT NULL REFERENCES cursos(id) ON DELETE CASCADE,
     estudiante_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    oferta_id UUID REFERENCES curso_oferta(id) ON DELETE CASCADE,
     estado_inscripcion estado_inscripcion DEFAULT 'inscrito',
-    nota DECIMAL(4,2) CHECK (nota >= 0 AND nota <= 100),
+    nota DECIMAL(5,2) CHECK (nota >= 0 AND nota <= 100),
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(curso_id, estudiante_id)
 );
+
+CREATE UNIQUE INDEX idx_curso_docente_oferta
+ON curso_docente(oferta_id, docente_id, rol_docente)
+WHERE oferta_id IS NOT NULL;
+
+CREATE UNIQUE INDEX idx_curso_estudiante_oferta
+ON curso_estudiante(oferta_id, estudiante_id)
+WHERE oferta_id IS NOT NULL;
 
 
 -- ================================0
