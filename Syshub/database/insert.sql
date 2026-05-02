@@ -66,7 +66,7 @@ INSERT INTO carreras ( nombre, codigo, facultad, activo, division_id) VALUES
 INSERT INTO usuarios ( nombre, apellidos, telefono, registro_academico, email, password_hash, rol_id, estado) VALUES
  
   -- 1 Admin
-  ('Cruz ',    'Zapil',    '50212340001', 'ADMIN-0001', 'admin@usac.edu.gt',            '12345',  (SELECT id FROM roles WHERE nombre = 'admin'), 'activo'),
+  ('Cruz ',    'Zapil',    '50212340001', 'ADMIN-0001', 'admin@usac.edu.gt',            ' $2a$06$PQzSYqHijSLJYf12Ut8JE.0k7Rl.BnuEsQxOfehw5zj9ccxAqBnt6',  (SELECT id FROM roles WHERE nombre = 'admin'), 'activo'),
  
   -- 4 Docentes
   ('Carlos',     'Morales López',    '50212340002', 'DOC-2024-01', 'c.morales@usac.edu.gt',        '12345',    (SELECT id FROM roles WHERE nombre = 'docente'), 'activo'),

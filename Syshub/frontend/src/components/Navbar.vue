@@ -15,15 +15,6 @@
             <router-link
               to="/"
               class="text-gray-700 hover:text-blue-600 transition font-medium"
-          <li>
-            <router-link
-              to="/admin"
-              class="text-gray-700 hover:text-blue-600 transition font-medium"
-              :class="{ 'text-blue-600 border-b-2 border-blue-600': isActive('/admin') }"
-            >
-              Admin
-            </router-link>
-          </li>
               :class="{ 'text-blue-600 border-b-2 border-blue-600': isActive('/') }"
             >
               Inicio
@@ -56,14 +47,13 @@
               Artículos
             </router-link>
           </li>
-        
           <li>
             <router-link
-              to="/articles"
+              to="/admin"
               class="text-gray-700 hover:text-blue-600 transition font-medium"
-              :class="{ 'text-blue-600 border-b-2 border-blue-600': isActive('/articles') }"
+              :class="{ 'text-blue-600 border-b-2 border-blue-600': isActive('/admin') }"
             >
-              
+              Admin
             </router-link>
           </li>
         </ul>
