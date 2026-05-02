@@ -18,6 +18,12 @@ getMe(@Request() req: any) {
   return this.usersService.findPrivateById(req.user.id || req.user.sub);
 }
 
+@UseGuards(JwtAuthGuard)
+@Get('me/content')
+getMyContent(@Request() req: any) {
+  return this.usersService.findMyContent(req.user.id || req.user.sub);
+}
+
 // público
 @Get(':id')
 findPublic(@Param("id", new ParseUUIDPipe()) id: string) {

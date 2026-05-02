@@ -88,13 +88,14 @@ export class UsersService {
   /// actualizar perfil:
 
   async update(id: string, data: Partial<User>) {
-    const allowedFields = ["nombre", "apellidos", "telefono", "password"];
+    // Solo permitimos editar campos no académicos (teléfono y contraseña)
+    const allowedFields = ["telefono", "telefono_casa", "password"];
 
     const filteredData: Partial<User> = {};
 
     for (const key of allowedFields) {
-      if (data[key] !== undefined) {
-        filteredData[key] = data[key];
+      if (data[key as keyof User] !== undefined) {
+        (filteredData as any)[key] = data[key as keyof User];
       }
     }
 
@@ -105,5 +106,35 @@ export class UsersService {
     await this.userRepository.update(id, filteredData);
 
     return this.findById(id);
+  }
+
+  /// obtener contenido del usuario
+  async findMyContent(userId: string) {
+    const proyectos = await this.userRepository.query(
+      `SELECT id, titulo, descripcion, created_at, estado FROM proyectos WHERE autor_id = $1 ORDER BY created_at DESC;`,
+      [userId]
+    );
+
+    const foros = await this.userRepository.query(
+      `SELECT id, titulo, contenido, created_at FROM hilos WHERE autor_id = $1 ORDER BY created_at DESC;`,
+      [userId]
+    );
+
+    const articulos = await this.userRepository.query(
+      `SELECT id, titulo, slug, created_at, publicado as estado FROM articulos WHERE autor_id = $1 ORDER BY created_at DESC;`,
+      [userId]
+    );
+
+    const notificaciones = await this.userRepository.query(
+      `SELECT id, tipo, mensaje, leido, created_at FROM notificaciones WHERE usuario_id = $1 ORDER BY created_at DESC;`,
+      [userId]
+    );
+
+    return {
+      proyectos,
+      foros,
+      articulos,
+      notificaciones
+    };
   }
 }
