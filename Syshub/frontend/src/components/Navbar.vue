@@ -15,6 +15,15 @@
             <router-link
               to="/"
               class="text-gray-700 hover:text-blue-600 transition font-medium"
+          <li>
+            <router-link
+              to="/admin"
+              class="text-gray-700 hover:text-blue-600 transition font-medium"
+              :class="{ 'text-blue-600 border-b-2 border-blue-600': isActive('/admin') }"
+            >
+              Admin
+            </router-link>
+          </li>
               :class="{ 'text-blue-600 border-b-2 border-blue-600': isActive('/') }"
             >
               Inicio
@@ -36,6 +45,25 @@
               :class="{ 'text-blue-600 border-b-2 border-blue-600': isActive('/forums') }"
             >
               Foros
+            </router-link>
+          </li>
+          <li>
+            <router-link
+              to="/articles"
+              class="text-gray-700 hover:text-blue-600 transition font-medium"
+              :class="{ 'text-blue-600 border-b-2 border-blue-600': isActive('/articles') }"
+            >
+              Artículos
+            </router-link>
+          </li>
+        
+          <li>
+            <router-link
+              to="/articles"
+              class="text-gray-700 hover:text-blue-600 transition font-medium"
+              :class="{ 'text-blue-600 border-b-2 border-blue-600': isActive('/articles') }"
+            >
+              
             </router-link>
           </li>
         </ul>

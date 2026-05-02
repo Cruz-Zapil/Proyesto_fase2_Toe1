@@ -10,6 +10,7 @@ import { UsersModule } from "./modules/users/users.module";
 import { ProjectsModule } from "./modules/projects/projects.module";
 import { ForumsModule } from "./modules/forums/forums.module";
 import { AdminModule } from "./modules/admin/admin.module";
+import { ArticulosModule } from "./modules/articles/articulos.module";
 
 // carrera
 import { CarrerasModule } from "./modules/carreras/carreras.module";
@@ -34,7 +35,7 @@ import { CursoModule } from "./modules/curso/curso.module";
     DivisionesModule,
     CarrerasModule,
     CursoModule,
-  
+    ArticulosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

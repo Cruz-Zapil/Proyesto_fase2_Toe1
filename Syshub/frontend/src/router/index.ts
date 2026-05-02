@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import Projects from '@/views/Projects.vue'
 import Forums from '@/views/Forums.vue'
+import Articles from '@/views/Articles.vue'
+import Admin from '@/views/Admin.vue'
 import Login from '@/views/Identidad/Login.vue'
 import Register from '@/views/Identidad/Register.vue'
 import Profile from '@/views/Profile.vue'
@@ -17,6 +19,8 @@ const routes = [
   { path: '/projects/new', component: NewProject, meta: { requiresAuth: true } },
   { path: '/projects/:id', component: ProjectDetail, meta: { requiresAuth: true } },
   { path: '/forums', component: Forums, meta: { requiresAuth: true } },
+  { path: '/articles', component: Articles, meta: { requiresAuth: true } },
+  { path: '/admin', component: Admin, meta: { requiresAuth: true } },
   { path: '/profile', component: Profile, meta: { requiresAuth: true } },
   { path: '/my-content', component: MyContent, meta: { requiresAuth: true } },
 
