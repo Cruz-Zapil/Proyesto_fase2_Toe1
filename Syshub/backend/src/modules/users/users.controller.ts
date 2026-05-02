@@ -14,7 +14,8 @@ export class UsersController {
 @UseGuards(JwtAuthGuard)
 @Get('me')
 getMe(@Request() req: any) {
-  return this.usersService.findPrivateById(req.user.sub);
+  console.log("getMe req.user =>", req.user);
+  return this.usersService.findPrivateById(req.user.id || req.user.sub);
 }
 
 // público

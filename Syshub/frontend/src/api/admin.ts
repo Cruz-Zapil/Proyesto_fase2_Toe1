@@ -35,12 +35,34 @@ export function getCursos() {
   return requestJson(`${API_URL}/admin/cursos`)
 }
 
+export function getCursoOfertas() {
+  return requestJson(`${API_URL}/admin/curso-ofertas`)
+}
+
+export function getPendingTeacherRequests() {
+  return requestJson(`${API_URL}/admin/postulaciones-docentes`)
+}
+
+export function getPendingStudentRequests() {
+  return requestJson(`${API_URL}/admin/solicitudes-estudiantes`)
+}
+
 export function approveUser(id: string) {
   return requestJson(`${API_URL}/admin/users/${id}/aprobar`, { method: 'PUT' })
 }
 
 export function rejectUser(id: string) {
   return requestJson(`${API_URL}/admin/users/${id}/rechazar`, { method: 'PUT' })
+}
+
+export function updateAdminUserState(
+  id: string,
+  payload: { estado: 'activo' | 'pendiente' | 'suspendido' | 'eliminado'; adminPassword?: string },
+) {
+  return requestJson(`${API_URL}/admin/users/${id}/estado`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
 }
 
 export function createDivision(payload: { codigo: string; nombre: string; descripcion?: string }) {
@@ -69,4 +91,33 @@ export function createCurso(payload: {
     method: 'POST',
     body: JSON.stringify(payload),
   })
+}
+
+export function createCursoOferta(payload: {
+  cursoId: string
+  seccion?: string
+  cicloAcademico?: string
+  anioAcademico?: number
+  cupo?: number
+}) {
+  return requestJson(`${API_URL}/admin/curso-ofertas`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function approveTeacherRequest(id: string) {
+  return requestJson(`${API_URL}/admin/postulaciones-docentes/${id}/aprobar`, { method: 'PUT' })
+}
+
+export function rejectTeacherRequest(id: string) {
+  return requestJson(`${API_URL}/admin/postulaciones-docentes/${id}/rechazar`, { method: 'PUT' })
+}
+
+export function approveStudentRequest(id: string) {
+  return requestJson(`${API_URL}/admin/solicitudes-estudiantes/${id}/aprobar`, { method: 'PUT' })
+}
+
+export function rejectStudentRequest(id: string) {
+  return requestJson(`${API_URL}/admin/solicitudes-estudiantes/${id}/rechazar`, { method: 'PUT' })
 }

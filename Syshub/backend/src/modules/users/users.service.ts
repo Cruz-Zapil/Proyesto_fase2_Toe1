@@ -32,12 +32,43 @@ export class UsersService {
 
   /// perfil privado ()
   async findPrivateById(id: string) {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.query(
+      `
+      SELECT
+        u.id,
+        u.nombre,
+        u.apellidos,
+        u.telefono,
+        u.telefono_casa,
+        u.registro_academico,
+        u.email,
+        u.rol_id AS "rolId",
+        u.estado,
+        u.token_verificacion,
+        u.email_verificado_at,
+        u.created_at,
+        u.updated_at,
+        r.nombre AS "rolNombre"
+      FROM usuarios u
+      JOIN roles r ON r.id = u.rol_id
+      WHERE u.id = $1
+      LIMIT 1
+    `,
+      [id],
+    );
 
-    if (!user) throw new NotFoundException("Usuario no encontrado");
+    if (!user.length) throw new NotFoundException("Usuario no encontrado");
 
-    const { password, ...rest } = user;
-    return rest;
+    const { password, ...rest } = user[0];
+    const normalizedRole = String(rest.rolNombre || "").trim().toLowerCase();
+    return {
+      ...rest,
+      rolNombre: rest.rolNombre || null,
+      esAdmin:
+        normalizedRole === "admin" ||
+        normalizedRole === "administrador" ||
+        normalizedRole.includes("admin"),
+    };
   }
 
   /// perfil publico

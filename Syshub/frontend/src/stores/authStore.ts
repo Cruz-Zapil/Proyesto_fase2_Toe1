@@ -1,12 +1,32 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { login as apiLogin } from '../api/auth'
 import { getMe } from '../api/users'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<any>(null)
   const token = ref<string | null>(localStorage.getItem('token'))
-  const isAuthenticated = ref(!!token.value)
+
+  // ✅ Mejor como computed (siempre sincronizado con token)
+  const isAuthenticated = computed(() => !!token.value)
+
+  // 🧠 Obtener nombre de rol de forma segura
+  const roleName = computed(() => {
+    const rawRole =
+      user.value?.rolNombre ||
+      user.value?.rol?.nombre ||
+      user.value?.rol ||
+      ''
+
+    return String(rawRole).trim().toLowerCase()
+  })
+
+  // 🔐 Saber si es admin
+  const isAdmin = computed(() => {
+    return user.value?.esAdmin === true ||
+           roleName.value === 'admin' ||
+           roleName.value.includes('administrador')
+  })
 
   // 🔐 LOGIN
   async function login(email: string, password: string) {
@@ -19,8 +39,6 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = data.access_token
     localStorage.setItem('token', data.access_token)
 
-    // ⚠️ OJO: aquí no siempre viene el user
-    // mejor lo traemos del backend
     await loadUser()
   }
 
@@ -29,8 +47,30 @@ export const useAuthStore = defineStore('auth', () => {
     if (!token.value) return
 
     try {
-      user.value = await getMe()
-      isAuthenticated.value = true
+      const profile = await getMe()
+
+      if (!profile?.id) {
+        throw new Error('Perfil inválido')
+      }
+
+      // Fallback: algunos despliegues no devuelven rolNombre en /users/me
+      if (profile && !profile.rolNombre && profile.id) {
+        try {
+          const { getAllAdminUsers } = await import('../api/admin')
+          const users = await getAllAdminUsers()
+          const current = Array.isArray(users)
+            ? users.find((u: any) => u.id === profile.id)
+            : null
+
+          if (current?.rolNombre) {
+            profile.rolNombre = current.rolNombre
+          }
+        } catch {
+          // ignorar si no tiene permisos
+        }
+      }
+
+      user.value = profile
     } catch (error) {
       logout()
     }
@@ -40,7 +80,6 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     token.value = null
     user.value = null
-    isAuthenticated.value = false
     localStorage.removeItem('token')
   }
 
@@ -48,6 +87,8 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     token,
     isAuthenticated,
+    roleName,
+    isAdmin,
     login,
     loadUser,
     logout,

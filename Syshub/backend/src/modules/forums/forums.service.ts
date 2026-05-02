@@ -212,6 +212,7 @@ export class ForumsService {
       FROM curso_estudiante ce
       JOIN cursos c ON c.id = ce.curso_id
       WHERE ce.estudiante_id = $1
+        AND ce.estado_solicitud = 'aprobado'
         AND ce.estado_inscripcion = 'inscrito'
       ORDER BY c.nombre ASC
     `,

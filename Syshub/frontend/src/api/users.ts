@@ -5,5 +5,10 @@ export async function getMe() {
     headers: getHeaders(true),
   });
 
-  return res.json();
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data?.message || 'Error al obtener perfil');
+  }
+
+  return data;
 }

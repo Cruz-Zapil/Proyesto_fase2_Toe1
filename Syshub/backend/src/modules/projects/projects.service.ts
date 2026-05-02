@@ -218,8 +218,8 @@ export class ProjectsService {
       `
       SELECT DISTINCT c.id, c.nombre
       FROM cursos c
-      LEFT JOIN curso_docente cd ON cd.curso_id = c.id
-      LEFT JOIN curso_estudiante ce ON ce.curso_id = c.id
+      LEFT JOIN curso_docente cd ON cd.curso_id = c.id AND cd.estado_solicitud = 'aprobado'
+      LEFT JOIN curso_estudiante ce ON ce.curso_id = c.id AND ce.estado_solicitud = 'aprobado'
       WHERE cd.docente_id = $1 OR ce.estudiante_id = $1
       ORDER BY c.nombre ASC
     `,

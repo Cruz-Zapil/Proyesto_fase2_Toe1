@@ -40,6 +40,7 @@ CREATE TABLE dominios_permitidos (
 CREATE TYPE estado_usuario AS ENUM ('activo','pendiente' ,'suspendido', 'eliminado');
 CREATE TYPE estado_carrera_usuario AS ENUM ('activo','suspendido', 'abandonado', 'finalizado');
 CREATE TYPE estado_inscripcion AS ENUM ('inscrito','retirado','aprobado','reprobado');
+CREATE TYPE estado_solicitud_enum AS ENUM ('pendiente','aprobado','rechazado');
 
 
 
@@ -57,7 +58,7 @@ CREATE TABLE usuarios (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     rol_id UUID NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,
-    estado estado_usuario DEFAULT 'pendiente',
+    estado estado_usuario NOT NULL DEFAULT 'pendiente',
 
     token_verificacion VARCHAR(255),
     email_verificado_at TIMESTAMP,
@@ -135,11 +136,12 @@ CREATE TABLE curso_oferta (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     curso_id UUID NOT NULL REFERENCES cursos(id) ON DELETE CASCADE,
     carrera_id UUID NOT NULL REFERENCES carreras(id) ON DELETE CASCADE,
-    seccion VARCHAR(10),
-    ciclo_academico VARCHAR(20),
+    seccion VARCHAR(10) NOT NULL,
+    ciclo_academico VARCHAR(20) NOT NULL,
+    anio_academico INTEGER NOT NULL,
     cupo INTEGER CHECK (cupo >= 0),
     created_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE(curso_id, carrera_id, seccion, ciclo_academico)
+    UNIQUE(curso_id, carrera_id, seccion, ciclo_academico, anio_academico)
 );
 
 CREATE TYPE rol_docente_enum AS ENUM ('docente', 'auxiliar');
@@ -149,7 +151,8 @@ CREATE TABLE curso_docente (
     curso_id UUID NOT NULL REFERENCES cursos(id) ON DELETE CASCADE,
     docente_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     rol_docente rol_docente_enum NOT NULL,
-    oferta_id UUID REFERENCES curso_oferta(id) ON DELETE CASCADE,
+    oferta_id UUID NOT NULL REFERENCES curso_oferta(id) ON DELETE CASCADE,
+    estado_solicitud estado_solicitud_enum NOT NULL DEFAULT 'pendiente',
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(curso_id, docente_id, rol_docente)
 );
@@ -159,21 +162,91 @@ CREATE TABLE curso_estudiante (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     curso_id UUID NOT NULL REFERENCES cursos(id) ON DELETE CASCADE,
     estudiante_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-    oferta_id UUID REFERENCES curso_oferta(id) ON DELETE CASCADE,
+    oferta_id UUID NOT NULL REFERENCES curso_oferta(id) ON DELETE CASCADE ,
+    estado_solicitud estado_solicitud_enum NOT NULL DEFAULT 'pendiente',
     estado_inscripcion estado_inscripcion DEFAULT 'inscrito',
     nota DECIMAL(5,2) CHECK (nota >= 0 AND nota <= 100),
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(curso_id, estudiante_id)
 );
 
-CREATE UNIQUE INDEX idx_curso_docente_oferta
-ON curso_docente(oferta_id, docente_id, rol_docente)
-WHERE oferta_id IS NOT NULL;
-
-CREATE UNIQUE INDEX idx_curso_estudiante_oferta
+-- nuevos indices:
+-- Reglas de Negocio: Académico
+CREATE UNIQUE INDEX idx_estudiante_por_oferta
 ON curso_estudiante(oferta_id, estudiante_id)
 WHERE oferta_id IS NOT NULL;
 
+CREATE UNIQUE INDEX idx_docente_principal_por_oferta
+ON curso_docente(oferta_id, docente_id)
+WHERE oferta_id IS NOT NULL AND rol_docente = 'docente';
+
+CREATE INDEX idx_curso_oferta_ciclo
+ON curso_oferta(anio_academico, ciclo_academico, seccion);
+
+CREATE INDEX idx_curso_estudiante_oferta
+ON curso_estudiante(oferta_id, estado_inscripcion);
+
+CREATE INDEX idx_curso_docente_oferta
+ON curso_docente(oferta_id, rol_docente);
+
+CREATE INDEX idx_curso_estudiante_estado_solicitud
+ON curso_estudiante(estado_solicitud);
+
+CREATE INDEX idx_curso_docente_estado_solicitud
+ON curso_docente(estado_solicitud);
+
+
+-- nueva funcion:
+-- ============================================================================
+-- REGLAS DE NEGOCIO: VALIDACIÓN DE DOCENTES Y ESTUDIANTES
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION validate_single_docente_per_oferta()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.rol_docente = 'docente' AND NEW.oferta_id IS NOT NULL THEN
+        IF (
+            SELECT COUNT(*)
+            FROM curso_docente
+            WHERE oferta_id = NEW.oferta_id
+              AND rol_docente = 'docente'
+              AND id != NEW.id
+        ) > 0 THEN
+            RAISE EXCEPTION 'Ya existe un docente principal asignado a esta oferta';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_validate_single_docente_per_oferta
+BEFORE INSERT OR UPDATE ON curso_docente
+FOR EACH ROW
+EXECUTE FUNCTION validate_single_docente_per_oferta();
+
+CREATE OR REPLACE FUNCTION validate_student_single_oferta()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.oferta_id IS NOT NULL THEN
+        IF (
+            SELECT COUNT(*)
+            FROM curso_estudiante
+            WHERE curso_id = NEW.curso_id
+              AND estudiante_id = NEW.estudiante_id
+              AND oferta_id != NEW.oferta_id
+              AND id != NEW.id
+        ) > 0 THEN
+            RAISE EXCEPTION 'Estudiante ya inscrito en otra sección del mismo curso';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_validate_student_single_oferta
+BEFORE INSERT OR UPDATE ON curso_estudiante
+FOR EACH ROW
+EXECUTE FUNCTION validate_student_single_oferta();
 
 -- ================================0
 -- 3 social core

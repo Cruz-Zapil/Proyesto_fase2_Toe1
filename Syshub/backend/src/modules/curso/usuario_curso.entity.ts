@@ -11,8 +11,11 @@ export class UsuarioCurso {
   @Column({ name: 'estudiante_id', type: 'uuid' })
   estudiante_id: string;
 
-  @Column({ name: 'oferta_id', type: 'uuid', nullable: true })
-  oferta_id: string | null;
+  @Column({ name: 'oferta_id', type: 'uuid' })
+  oferta_id: string;
+
+  @Column({ name: 'estado_solicitud', default: 'pendiente' })
+  estado_solicitud: string;
 
   @Column({ name: 'estado_inscripcion', default: 'inscrito' })
   estado_inscripcion: string;

@@ -34,9 +34,19 @@ findEstudiantes(@Param('id', new ParseUUIDPipe()) id: string) {
 inscribir(
   @Param('id', ParseUUIDPipe) cursoId: string,
   @Request() req: any,
-  @Body() body: { ofertaId?: string },
+  @Body() body: { ofertaId: string },
 ) {
-  return this.cursoService.inscribirUsuario(cursoId, req.user.sub, body?.ofertaId);
+  return this.cursoService.inscribirUsuario(cursoId, req.user.id ?? req.user.sub, body.ofertaId);
+}
+
+@UseGuards(JwtAuthGuard)
+@Post('ofertas/:ofertaId/postular-docente')
+postularDocente(
+  @Param('ofertaId', ParseUUIDPipe) ofertaId: string,
+  @Request() req: any,
+  @Body() body?: { rolDocente?: 'docente' | 'auxiliar' },
+) {
+  return this.cursoService.postularDocente(ofertaId, req.user.id ?? req.user.sub, body?.rolDocente ?? 'docente');
 }
 
 @Get(':id/oferta')

@@ -140,18 +140,18 @@ INSERT INTO carrera_curso (carrera_id, curso_id, semestre, obligatorio) VALUES
   
  
 -- ============================================================================
--- 8. CURSO_OFERTA (oferta académica ciclo 2024-1)
+-- 8. CURSO_OFERTA (oferta académica 2024)
 -- ============================================================================
-INSERT INTO curso_oferta (curso_id, carrera_id, seccion, ciclo_academico, cupo) VALUES
-  ('b88844f7-71e3-4b71-b640-d3f7cbd831fb', '66260dd8-63e1-4903-a9f3-c35aa7c26332', 'A', '2024-1', 40),
-  ('174c4114-b020-42f8-97d4-4f8477ed6153', '5a165bae-936e-41b5-856e-d40b2431441d', 'A', '2024-1', 35),
-  ('69e28d5b-deac-46d5-9f9f-ef3099d52ddf', 'a26bc584-f5c8-46af-a6c2-fe0037bc95dd', 'A', '2024-1', 30),
-  ('9d49270b-e9cf-4893-9de1-fc389cc97631', 'a05320b3-3714-4683-a88b-f4849f523cc9', 'A', '2024-1', 50),
-  ('9f181726-08b0-4a59-afd0-53f3a0473d87', '49729ec8-ed9f-41bd-81d8-4157ea83e8a1', 'A', '2024-1', 50),
-  ('19b4c943-347f-49c5-9501-9c1ba6e367a5', '907f67c6-e5f1-4988-9e0d-0fceb0f33c8b', 'A', '2024-1', 45),
-  ('dfaed8b9-e16a-458e-b3da-6b55ea9010a5', 'ed7d8f00-6883-40b2-85f8-afa9abf5480e', 'A', '2024-1', 40),
-  ('68282a84-bf50-47f2-87ad-639ffa108407', '241408d4-f872-4853-98df-4abc3bc7097d', 'A', '2024-1', 40),
-  ('bd9bc08a-d476-4212-ad22-fbf85b634b72', 'ade9e103-5398-42bb-a3f7-12a46f387ac2', 'A', '2024-1', 40);
+INSERT INTO curso_oferta (curso_id, carrera_id, seccion, ciclo_academico, anio_academico, cupo) VALUES
+  ('b88844f7-71e3-4b71-b640-d3f7cbd831fb', '66260dd8-63e1-4903-a9f3-c35aa7c26332', 'A', 'primero', 2024, 40),
+  ('174c4114-b020-42f8-97d4-4f8477ed6153', '5a165bae-936e-41b5-856e-d40b2431441d', 'A', 'primero', 2024, 35),
+  ('69e28d5b-deac-46d5-9f9f-ef3099d52ddf', 'a26bc584-f5c8-46af-a6c2-fe0037bc95dd', 'A', 'primero', 2024, 30),
+  ('9d49270b-e9cf-4893-9de1-fc389cc97631', 'a05320b3-3714-4683-a88b-f4849f523cc9', 'A', 'primero', 2024, 50),
+  ('9f181726-08b0-4a59-afd0-53f3a0473d87', '49729ec8-ed9f-41bd-81d8-4157ea83e8a1', 'A', 'primero', 2024, 50),
+  ('19b4c943-347f-49c5-9501-9c1ba6e367a5', '907f67c6-e5f1-4988-9e0d-0fceb0f33c8b', 'A', 'primero', 2024, 45),
+  ('dfaed8b9-e16a-458e-b3da-6b55ea9010a5', 'ed7d8f00-6883-40b2-85f8-afa9abf5480e', 'A', 'primero', 2024, 40),
+  ('68282a84-bf50-47f2-87ad-639ffa108407', '241408d4-f872-4853-98df-4abc3bc7097d', 'A', 'primero', 2024, 40),
+  ('bd9bc08a-d476-4212-ad22-fbf85b634b72', 'ade9e103-5398-42bb-a3f7-12a46f387ac2', 'A', 'primero', 2024, 40);
  
  
 -- ============================================================================
